@@ -1,3 +1,5 @@
+> ⚠️ **Draft** — MCP integration is a Phase 3+ commodity feature. This document will be updated when prioritized. See [project-plan.md](project-plan.md).
+
 # MCP Integration — Ecosystem Compatibility
 
 > Sponge's plugin system is **MCP-native**. The `Plugin ABC` wraps MCP servers as first-class citizens, giving users access to the entire MCP ecosystem without writing adapter code.

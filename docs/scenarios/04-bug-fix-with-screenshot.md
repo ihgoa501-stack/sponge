@@ -1,3 +1,5 @@
+> ⚠️ **Draft** — Describes planned Phase 3+ behavior (multimodal input). See [project-plan.md](../project-plan.md).
+
 # 场景 4：Bug 修复（含截图）
 
 > 展示了多模态输入——用户提供截图，Sponge 理解图像内容并修复对应的 bug。

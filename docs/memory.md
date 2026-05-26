@@ -1,3 +1,5 @@
+> ⚠️ **Draft** — Long-term memory and multimodal input are Phase 3+ commodity features. This document will be updated when prioritized. See [project-plan.md](project-plan.md).
+
 # Memory & Multimodal Input
 
 > Two previously unaddressed dimensions: **cross-session memory** so Sponge doesn't repeat mistakes, and **multimodal input** so it isn't blind to screenshots, diagrams, and PDFs.

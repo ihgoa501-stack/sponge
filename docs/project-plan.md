@@ -46,19 +46,40 @@ The current docs already contain the right ingredients: cost tracking, caches, c
 
 This is stronger than "auto-tune thresholds" because it creates an audit trail and a repeatable optimization lab.
 
+## Critical Self-Assessment (2026-05-24)
+
+The original 12-phase waterfall had fundamental flaws identified during review:
+
+1. **The core value proposition was deferred to Phase 9.** "越用越省钱" required replay optimizer + live self-tuning, both at the end. Before Phase 9, Sponge would be the *most expensive* option because "no silent downgrade" forces every call through the configured premium model with none of the savings infrastructure active.
+
+2. **Phases 3-8 were chasing features competitors already have.** Context compression, semantic cache, sub-agents, multimodal — Claude Code, Cursor, and Copilot already do these. Sponge matching them is not differentiation; it's catch-up. Only cost fingerprint replay is unique.
+
+3. **12-phase waterfall = no pivot point.** If Phase 4 revealed no user interest, Phases 0-3 are sunk cost. No intermediate milestone proves the core hypothesis.
+
+4. **Documentation outpaced code by infinity.** 25+ docs, 10 ADRs, 5 scenarios — all describing a product that cannot run a single agent task. This is analysis paralysis.
+
+### The Fix: Fingerprint-First
+
+Sponge's only moat is the **cost fingerprint → replay → tune** closed loop. Everything else is commodity.
+
+The revised strategy: **prove the unique thing first, then add commodity features.**
+
+| What was cut | Why |
+|-------------|-----|
+| Phase 3: Context Compression | Useful but not unique. Add after replay is proven. |
+| Phase 4: Plugin Routing + Approval | Useful but not unique. Add after replay is proven. |
+| Phase 6: Prompt Cache Strategy | Provider-specific. Can fold into Phase 1 cost tracking. |
+| Phase 7: Semantic Cache | Premature without real usage data to tune similarity thresholds. |
+| Phase 8: Sub-Agent Condensation | No sub-agents until the main agent loop works. |
+| Phase 10: Live Self-Tuning | Folded into Phase 2 (replay optimizer already includes gated application). |
+| Phase 11: Multimodal | Nice-to-have. Not core. |
+| Phase 12: Benchmarks | Benchmarks start in Phase 1 as unit-test fixtures. No separate phase needed. |
+
 ## Coding Capability
 
-Sponge is intended to become a coding-capable agent harness. It should be able to answer coding questions, inspect repositories, run tests, edit files under approval, resume interrupted work, and condense large codebase exploration through sub-agents.
-
-The important boundary is timing:
-
-- Before Phase 1, Sponge cannot run useful agent tasks.
-- After Phase 1, Sponge can answer coding questions through a single model call.
-- After Phase 4, Sponge can safely inspect and edit code through approved local tools.
-- After Phase 5, Sponge can resume coding sessions and record replayable cost fingerprints.
-- After Phase 8, Sponge can handle larger codebase tasks through sub-agent condensation.
-
-So the answer is yes: Sponge can be used to write code once the tool, approval, and session phases exist. At the current skeleton stage, it is not yet a code-writing agent.
+- After Phase 1, Sponge can answer coding questions through a single model call with cost tracking and fingerprint recording.
+- After Phase 2, Sponge can replay historical fingerprints to recommend cost-saving config changes.
+- After Phase 3+, Sponge can edit code, route plugins, compress context, and spawn sub-agents — each added only after the core fingerprint loop is proven.
 
 ## Planning Corrections
 
@@ -76,213 +97,79 @@ These corrections should guide all future docs and implementation plans:
 
 ## Phase Strategy
 
-The old roadmap placed self-tuning near the end. That delays the product promise. The revised strategy brings the evidence loop forward:
+Three phases to prove the core hypothesis. After Phase 2, Sponge has its moat. Everything else is additive.
 
-| Phase | Name | Primary Proof | Why It Exists |
-|-------|------|---------------|---------------|
-| 0 | Development Foundation | Package installs, CLI starts, tests run | Make worker agents productive |
-| 1 | Cost-Aware Hello | One streamed model call with real usage and cost | Establish the accounting spine |
-| 2 | Savings Ledger + Exact Cache | Repeating the same task costs $0 model spend | Prove the user can see savings immediately |
-| 3 | Context Compression MVP | Multi-turn fixtures show fewer input tokens | Prove same model sees less context |
-| 4 | Plugin Routing + Approval | Local file/search tasks bypass LLM safely | Prove zero-token work path |
-| 5 | Session + Cost Fingerprints | Runs produce replayable cost records | Prepare optimization from real data |
-| 6 | Prompt Cache Strategy | Provider-specific prompt cache decisions are visible | Capture major recurring-prefix savings |
-| 7 | Semantic Cache with State Guards | Similar stable tasks can reuse answers safely | Add near-repeat savings without stale-code bugs |
-| 8 | Sub-Agent Condensation | Exploration returns condensed evidence | Reduce large search/review contexts |
-| 9 | Replay-Based Optimizer | Historical runs recommend config changes | Make "越用越省钱" measurable before live A/B |
-| 10 | Live Self-Tuning | Winning configs apply through gated feedback | Complete the closed loop |
-| 11 | Multimodal + Advanced Providers | Images/PDFs enter the same cost discipline | Extend value without breaking economics |
-| 12 | Benchmarks + Public Proof | Published savings suite vs naive baselines | Support launch claims |
+| Phase | Name | Primary Proof | Why First |
+|-------|------|---------------|-----------|
+| 0 | Development Foundation | Package installs, CLI starts, tests run | ✅ Done |
+| 1 | Agent Loop + Cost Fingerprint | Streamed LLM call + exact cache + savings ledger + fingerprint recording | The accounting spine. Every call from day one produces data that feeds the optimizer. |
+| 2 | Replay Optimizer MVP | Historical fingerprints replayed under candidate configs → tuning proposals with cost delta + risk | The moat. No other harness does this. If this doesn't work, nothing else matters. |
+| 3+ | Commodity Features | Context compression, plugin routing, approval gates, sub-agents, multimodal | Added one at a time, each measured by whether it improves the replay optimizer's savings proposals. |
 
 ## Phase Acceptance Criteria
 
-### Phase 0: Development Foundation
+### Phase 0: Development Foundation ✅
 
-Done when:
+Done. `sponge --version` works. pytest/ruff/mypy pass. CI is configured.
 
-- `pip install -e .` works in a fresh checkout.
-- `sponge --version` prints the project version.
-- `pytest`, `ruff`, and `mypy` run locally.
-- CI runs lint, typecheck, and tests.
-- No runtime feature claims are added without tests.
-
-Worker agents:
-
-- Infra agent: packaging, CI, lint/typecheck.
-- Docs agent: align README, ROADMAP, and CLI docs with Phase 0 status.
-
-### Phase 1: Cost-Aware Hello
+### Phase 1: Agent Loop + Cost Fingerprint
 
 Done when:
 
 - `sponge run "say hello"` streams output from one configured provider.
 - Actual usage is recorded from provider response events.
-- Output includes total estimated or actual cost with model ID.
-- Tests use mock providers by default; real provider tests are opt-in.
+- Exact result cache (SHA256) returns cached responses for identical tasks without a model call.
+- Every call writes a **cost fingerprint** to local SQLite: task hash, model, tokens in/out, cache hit/miss, cost, repo state marker, provider capabilities.
+- Output includes a **savings ledger**: naive baseline cost vs actual cost, split by source (exact cache, prompt cache).
+- Pricing data is read from `src/sponge/data/pricing.toml` — never hardcoded.
+- Tests use mock providers; real provider tests are opt-in via `--run-slow`.
+- At least 3 benchmark fixtures (simple Q&A, repeated Q&A, code question) pass and report token counts.
 
 Worker agents:
 
-- LLM agent: provider ABC, streaming event types, one provider.
-- Cost agent: pricing model, usage model, cost tracker.
-- CLI agent: `run` command, streaming renderer, JSON mode.
+- LLM agent: provider ABC, streaming event types, one provider (Anthropic).
+- Cost agent: pricing loader, cost tracker, savings ledger.
+- Cache agent: SQLite exact result cache with state-aware keys.
+- Telemetry agent: cost fingerprint schema and SQLite persistence.
+- CLI agent: `run` command, streaming renderer, cost report, JSON mode.
 
-### Phase 2: Savings Ledger + Exact Cache
+### Phase 2: Replay Optimizer MVP
 
 Done when:
 
-- Identical task + compatible context returns from exact cache without a model call.
-- Report includes actual cost, naive baseline, and savings by source.
-- Cache keys include prompt, model, relevant config, and project state marker.
-- `--no-cache` bypasses caches for debugging.
+- `sponge tune --report` reads historical fingerprints from SQLite.
+- The replay engine simulates candidate parameter values over stored fingerprints **without calling real LLM APIs**.
+- The pattern analyzer detects at minimum: cache gap (TTL too short), budget slack (ceiling too high), and task repeats (cache TTL extension).
+- Each tuning proposal includes: parameter, current value, proposed value, estimated cost delta, risk level, and SQL query evidence.
+- Proposals are ranked by estimated savings ÷ risk.
+- Low-risk proposals (estimated < $0.50/session impact) can auto-apply with `sponge tune --apply`.
+- At least 10 fixture fingerprints produce at least 1 non-trivial tuning proposal.
 
 Worker agents:
 
-- Cache agent: SQLite store and exact result cache.
-- Cost agent: naive baseline and savings ledger.
-- CLI agent: cost report display.
+- Telemetry agent: fingerprint query helpers.
+- Optimizer agent: replay engine, pattern analyzer (SQL queries), proposal model.
+- CLI agent: `sponge tune --report` and `sponge tune --apply`.
 
-### Phase 3: Context Compression MVP
+### Phase 3+: Commodity Features
 
-Done when:
+Each feature is added only when:
 
-- Tool outputs above threshold can be masked.
-- Message pruning preserves first user request and recent turns.
-- Fixture tests show lower token count and preserved answerability.
-- Compression reports pre/post tokens and layer decisions.
+1. A concrete use case shows it would improve replay optimizer proposals.
+2. It can be measured against the benchmark fixtures from Phase 1.
 
-Worker agents:
+Candidate features, in no fixed order:
 
-- Context agent: masking and pruning only.
-- Test agent: realistic fixture conversations and preservation checks.
+- Context compression (5-layer pipeline)
+- Plugin routing + approval gates (file ops, shell, search)
+- Sub-agent condensation (codebase exploration)
+- Semantic cache with state guards
+- Multimodal input (images, PDFs)
+- MCP server integration
+- Session resume and multi-turn persistence
+- Provider expansion (OpenAI, DeepSeek)
 
-### Phase 4: Plugin Routing + Approval
-
-Done when:
-
-- Read-only file listing/search can execute locally with zero model cost.
-- Writes and shell execution pass through approval policy.
-- Tool decisions are logged to cost ledger and event stream.
-- Native plugins are preferred before MCP.
-
-Worker agents:
-
-- Plugin agent: plugin ABC, registry, read-only builtins.
-- Approval agent: allow/confirm/reject policy chain.
-- Security agent: dangerous command/file operation tests.
-
-### Phase 5: Session + Cost Fingerprints
-
-Done when:
-
-- Each run emits a cost fingerprint JSON record.
-- Sessions can be listed and resumed from persisted state.
-- Fingerprints include repo state, provider capabilities, cache decisions, compression decisions, and usage.
-- Fingerprints are stable enough for replay simulation.
-
-Worker agents:
-
-- Session agent: event stream, session lifecycle.
-- Telemetry agent: fingerprint schema and SQLite persistence.
-
-### Phase 6: Prompt Cache Strategy
-
-Done when:
-
-- Provider capabilities declare prompt cache support, TTLs, and multipliers.
-- Prompt cache decisions are recorded in the savings ledger.
-- Break-even logic avoids cache writes that are likely more expensive than misses.
-- Provider changes warn about changed cache economics.
-
-Worker agents:
-
-- Provider agent: capability model.
-- Cache agent: prompt cache policy and accounting.
-
-### Phase 7: Semantic Cache with State Guards
-
-Done when:
-
-- Semantic cache can return near-repeat answers only under compatible state.
-- Embedding model ID is locked into cache metadata.
-- False-positive risk is handled with high default threshold and traceable reasons.
-- Stale repository state causes a cache miss.
-
-Worker agents:
-
-- Semantic cache agent: embeddings, similarity, metadata.
-- Safety agent: stale-cache and false-positive fixtures.
-
-### Phase 8: Sub-Agent Condensation
-
-Done when:
-
-- Search/review sub-agents return structured condensed findings, not raw transcript dumps.
-- Parent model receives evidence summaries with source references.
-- Savings ledger compares raw exploration tokens against condensed tokens.
-- Sub-agent model use is documented as helper execution, not final-model downgrade.
-
-Worker agents:
-
-- Sub-agent agent: dispatch and result schema.
-- Review/search agent: first built-in sub-agent tasks.
-
-### Phase 9: Replay-Based Optimizer
-
-Done when:
-
-- Historical cost fingerprints can be replayed under alternative config values.
-- Optimizer produces proposals with estimated cost delta and risk.
-- Proposals include rejection reasons, not just winners.
-- Replay does not call real LLM APIs.
-
-Worker agents:
-
-- Optimizer agent: replay engine and proposal model.
-- Telemetry agent: query helpers over fingerprint store.
-
-### Phase 10: Live Self-Tuning
-
-Done when:
-
-- Low-risk proposals can enter shadow testing.
-- Shadow testing tracks cost, latency, cache rate, compression ratio, and rollback signals.
-- Winning changes are applied to config with history.
-- High-risk changes require user review.
-
-Worker agents:
-
-- Feedback agent: experiment assignment and evaluation.
-- Config agent: tunable config store and history.
-- CLI agent: `sponge tune --report`.
-
-### Phase 11: Multimodal + Advanced Providers
-
-Done when:
-
-- Image/PDF inputs are represented as content blocks.
-- Multimodal cache keys include file hashes.
-- Compression policy can omit old images with explicit placeholders.
-- Anthropic/OpenAI provider differences are surfaced.
-
-Worker agents:
-
-- Provider agent: multimodal support.
-- Context agent: multimodal budget.
-- Cache agent: file content addressing.
-
-### Phase 12: Benchmarks + Public Proof
-
-Done when:
-
-- Benchmark suite compares Sponge against naive same-model baselines.
-- Claims are workload-scoped and reproducible.
-- Docs show methodology, not only headline percentages.
-- Public README claims match benchmark evidence.
-
-Worker agents:
-
-- Benchmark agent: fixtures, scripts, reports.
-- Docs agent: claim calibration and launch narrative.
+No separate phase plan exists for these. Each is a standalone mini-project with its own plan file when prioritized.
 
 ## Agent Handoff Protocol
 
@@ -306,11 +193,8 @@ Planner review after each task should check:
 
 ## Immediate Next Planning Work
 
-The next planner outputs should be written in this order:
+1. `docs/superpowers/plans/2026-05-24-phase-1-cost-fingerprint.md` — detailed implementation plan for Phase 1.
+2. `docs/superpowers/plans/2026-05-24-phase-2-replay-optimizer.md` — after Phase 1 is complete.
+3. Keep [claims.md](claims.md) and [pricing-policy.md](pricing-policy.md) current.
 
-1. `docs/superpowers/plans/2026-05-24-phase-0-foundation.md`
-2. `docs/superpowers/plans/2026-05-24-phase-1-cost-aware-hello.md`
-3. `docs/superpowers/plans/2026-05-24-phase-2-savings-ledger-cache.md`
-4. Keep [claims.md](claims.md) and [pricing-policy.md](pricing-policy.md) current as implementation evidence changes.
-
-Do not start broad runtime implementation before Phase 0 and Phase 1 plans are approved.
+Do not create plans for Phase 3+ features until Phase 2 proves the fingerprint→replay→tune loop works.

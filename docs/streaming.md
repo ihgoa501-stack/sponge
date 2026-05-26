@@ -1,3 +1,5 @@
+> ⚠️ **Draft** — Streaming is implemented in Phase 1 as part of the agent loop. The detailed design here describes features planned for Phase 3+. See [project-plan.md](project-plan.md).
+
 # Streaming Responses — Interactive Latency
 
 > A blocking `llm.chat()` architecture hides latency behind a 30-second loading spinner. Sponge streams by default — characters appear as the model generates them, and the cost tracker accrues incrementally.

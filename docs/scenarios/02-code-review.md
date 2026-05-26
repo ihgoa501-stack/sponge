@@ -1,3 +1,5 @@
+> ⚠️ **Draft** — Describes planned Phase 3+ behavior (sub-agents, approval gates). See [project-plan.md](../project-plan.md).
+
 # 场景 2：代码审查
 
 > 使用 sub-agent 进行代码审查，浓缩结果后发给最佳模型。展示了 sub-agent dispatch、condensation、approval gate 的交互。

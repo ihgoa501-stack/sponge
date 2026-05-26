@@ -1,3 +1,5 @@
+> ⚠️ **Draft** — Configuration model is being implemented in Phase 1. This document will be updated as implementation progresses. See [project-plan.md](project-plan.md).
+
 # Configuration Reference
 
 > Sponge 的配置系统基于 TOML 文件 + 环境变量覆盖。配置文件路径默认为 `~/.sponge/config.toml`，可通过 `SPONGE_CONFIG` 环境变量或 `--config` 参数覆盖。

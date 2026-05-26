@@ -1,3 +1,5 @@
+> ⚠️ **Draft** — Describes planned Phase 1+ behavior. See [project-plan.md](../project-plan.md).
+
 # 场景 1：基本问答
 
 > 最简单的 Sponge 使用场景——问一个问题，得到一个流式回答，看到成本报告。

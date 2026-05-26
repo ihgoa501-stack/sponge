@@ -1,3 +1,5 @@
+> ⚠️ **Draft** — The replay optimizer (Phase 2) supersedes the self-tuning design described here. This document will be updated when Phase 2 is complete. See [project-plan.md](project-plan.md) for current strategy.
+
 # Self-Tuning Infrastructure
 
 > Sponge's most radical planned feature: the harness records cost fingerprints,

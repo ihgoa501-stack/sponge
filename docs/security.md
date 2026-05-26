@@ -1,3 +1,5 @@
+> ⚠️ **Draft** — Approval gates and security policies are Phase 3+ commodity features. This document will be updated when prioritized. See [project-plan.md](project-plan.md).
+
 # Security Model — Approval Gates & Permissions
 
 > Zero-cost plugins (`file_ops`, `shell`) are powerful but dangerous. Sponge's security model ensures that destructive operations always require user consent — without overwhelming the user with unnecessary prompts.

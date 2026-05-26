@@ -1,3 +1,5 @@
+> ⚠️ **Draft** — Describes planned Phase 3+ behavior (JSON output, auto-approve). See [project-plan.md](../project-plan.md).
+
 # 场景 5：CI/CD 集成
 
 > 展示了 Sponge 在 CI/CD 管道中的非交互式使用——没有流式输出、自动批准、JSON 格式输出。

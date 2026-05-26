@@ -1,3 +1,5 @@
+> ⚠️ **Draft** — CLI commands described here are planned for Phase 1+. Only `sponge --version` currently exists. See [project-plan.md](project-plan.md) for current status.
+
 # CLI Reference
 
 > `sponge` 命令的完整参考。所有命令基于 typer 构建，支持 `--help`。

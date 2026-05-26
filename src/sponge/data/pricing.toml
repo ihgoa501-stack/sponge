@@ -1,0 +1,62 @@
+# Sponge Pricing Data
+# ====================
+# Versioned, source-cited pricing for every supported provider.
+# This is the single source of truth for cost estimation.
+# Runtime code MUST read from here; never hardcode prices.
+#
+# Last updated: 2026-05-24
+# Format: all prices in USD per 1M tokens
+# Source URLs are required and must be dated.
+
+[providers.anthropic]
+homepage = "https://www.anthropic.com/pricing"
+note = "Prompt cache write is 1.25× base input; read is 0.10× base input."
+
+[providers.anthropic.models.claude-opus-4-7]
+input = 15.00
+output = 75.00
+cache_write = 18.75
+cache_read = 1.50
+
+[providers.anthropic.models.claude-sonnet-4]
+input = 3.00
+output = 15.00
+cache_write = 3.75
+cache_read = 0.30
+
+[providers.anthropic.models.claude-haiku-3-5]
+input = 0.80
+output = 4.00
+cache_write = 1.00
+cache_read = 0.08
+
+[providers.openai]
+homepage = "https://openai.com/api/pricing/"
+note = "Prompt cache (automatic) is 0.50× base input for reads on supported models."
+
+[providers.openai.models.gpt-4o]
+input = 2.50
+output = 10.00
+cache_read = 1.25
+
+[providers.openai.models.gpt-4o-mini]
+input = 0.15
+output = 0.60
+cache_read = 0.075
+
+[providers.deepseek]
+homepage = "https://platform.deepseek.com/api-docs/pricing"
+note = "DeepSeek uses OpenAI-compatible API. Prompt caching not yet supported."
+
+[providers.deepseek.models.deepseek-v3]
+input = 0.27
+output = 1.10
+
+[providers.deepseek.models.deepseek-r1]
+input = 0.55
+output = 2.19
+
+[meta]
+version = "0.1.0-dev"
+generated = "2026-05-24T00:00:00Z"
+disclaimer = "Prices are approximate and must be verified against provider pages before use in production. Update at minimum monthly."

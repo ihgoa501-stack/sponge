@@ -1,3 +1,5 @@
+> ⚠️ **Draft** — Scenarios describe planned features. Most capabilities shown here will not exist until Phase 3+. See [project-plan.md](../project-plan.md) for current status.
+
 # 使用场景
 
 > 5 个具体的使用场景，展示 Sponge 在不同场景下的工作方式。

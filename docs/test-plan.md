@@ -1,3 +1,5 @@
+> ⚠️ **Draft** — Test strategy has been folded into individual phase plans. See [project-plan.md](project-plan.md) for current approach.
+
 # Test Plan — 测试策略
 
 > Sponge 的测试策略遵循"每一分钱都要花在刀刃上"的原则——测试应该**快**（CI 不能成为开发瓶颈）、**省**（永远不浪费真实 LLM 调用）、**有洞察**（基准测试必须验证省钱效果）。

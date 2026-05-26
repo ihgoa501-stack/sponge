@@ -1,0 +1,6 @@
+{
+  "name": "code_question",
+  "task": "Write a Python function that returns the Fibonacci sequence up to n.",
+  "expected_contains": ["def fib", "return"],
+  "expected_max_cost": 0.15
+}

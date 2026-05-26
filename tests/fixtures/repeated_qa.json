@@ -1,0 +1,8 @@
+{
+  "name": "repeated_qa",
+  "task": "What is the capital of France?",
+  "repeat_count": 2,
+  "expected_contains": ["Paris"],
+  "expected_second_call_cost": 0.0,
+  "expected_second_call_cache_hit": true
+}

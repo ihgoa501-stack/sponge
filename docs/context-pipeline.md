@@ -1,3 +1,5 @@
+> ⚠️ **Draft** — Context compression is a Phase 3+ commodity feature. This document will be updated when prioritized. See [project-plan.md](project-plan.md) for current phase strategy.
+
 # Context Pipeline — 5-Layer Compression
 
 > Every token sent to the best model is scrutinized. The context pipeline runs **before every call**, asking: *"How few tokens can we send and still get the same quality?"*

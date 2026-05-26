@@ -1,3 +1,5 @@
+> ⚠️ **Draft** — Describes planned Phase 3+ behavior (memory, multi-step approval). See [project-plan.md](../project-plan.md).
+
 # 场景 3：多步重构 + 记忆
 
 > 展示了多步重构过程：读取文件 → 分析 → 修改 → 验证。同时展示了长期记忆如何阻止重复错误。
