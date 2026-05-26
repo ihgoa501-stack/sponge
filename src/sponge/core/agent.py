@@ -85,11 +85,12 @@ class Agent:
             if match and match.confidence >= 0.8:
                 from sponge.plugins.base import ApprovalLevel, PluginContext
 
-                # Check approval level.
-                if match.plugin.approval == ApprovalLevel.REJECT:
+                # Check approval level (per-match overrides per-plugin default).
+                approval = match.approval or match.plugin.approval
+                if approval == ApprovalLevel.REJECT:
                     logger.info("Plugin %s rejected by policy", match.plugin.name)
                 elif (
-                    match.plugin.approval == ApprovalLevel.CONFIRM
+                    approval == ApprovalLevel.CONFIRM
                     and not self._settings.auto_approve
                 ):
                     logger.info(

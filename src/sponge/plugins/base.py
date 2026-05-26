@@ -37,6 +37,7 @@ class PluginMatch:
     plugin: Plugin
     confidence: float  # 0.0–1.0
     args: dict[str, str] = field(default_factory=dict)
+    approval: ApprovalLevel | None = None  # Overrides plugin.default if set
 
 
 class Plugin(ABC):

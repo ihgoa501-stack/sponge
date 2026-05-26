@@ -12,6 +12,7 @@ import re
 from pathlib import Path
 
 from sponge.plugins.base import (
+    ApprovalLevel,
     Plugin,
     PluginContext,
     PluginMatch,
@@ -110,9 +111,9 @@ def _safe_resolve(path_str: str) -> Path | None:
 class FileOpsPlugin(Plugin):
     """Handles file read, list, write, and delete via pattern matching.
 
-    Read and list operations execute directly (ALLOW).
-    Write and delete require confirmation (CONFIRM) — they are not
-    executed until the approval infrastructure is built.
+    Read and list operations auto-execute (ALLOW).
+    Write and delete require --auto-approve (CONFIRM).
+    Path traversal outside CWD is always blocked.
     """
 
     name = "file_ops"
@@ -167,10 +168,15 @@ class FileOpsPlugin(Plugin):
         if not paths:
             confidence = 0.6
 
+        # Read and list are safe — execute without confirmation.
+        # Write and delete are destructive — require --auto-approve.
+        approval = ApprovalLevel.ALLOW if kind in ("read", "list") else ApprovalLevel.CONFIRM
+
         return PluginMatch(
             plugin=self,
             confidence=confidence,
             args={"kind": kind, "paths": ",".join(paths)},
+            approval=approval,
         )
 
     async def execute(self, context: PluginContext) -> PluginResult:

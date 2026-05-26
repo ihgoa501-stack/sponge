@@ -341,3 +341,42 @@ async def test_shell_blocklist_blocked_at_execute(shell_plugin: ShellPlugin) -> 
     result = await shell_plugin.execute(PluginContext(task="run sudo rm -rf /"))
     assert result.success is False
     assert "Blocked" in result.output
+
+
+# ── Approval gates ──────────────────────────────────────────────────
+
+
+def test_file_ops_read_is_allow(file_plugin: FileOpsPlugin) -> None:
+    """Read operations get ALLOW approval — no --auto-approve needed."""
+    match = file_plugin.can_handle("read README.md")
+    assert match is not None
+    from sponge.plugins.base import ApprovalLevel
+
+    assert match.approval == ApprovalLevel.ALLOW
+
+
+def test_file_ops_write_is_confirm(file_plugin: FileOpsPlugin) -> None:
+    """Write operations get CONFIRM approval — needs --auto-approve."""
+    match = file_plugin.can_handle("write 'hello' to test.txt")
+    assert match is not None
+    from sponge.plugins.base import ApprovalLevel
+
+    assert match.approval == ApprovalLevel.CONFIRM
+
+
+def test_file_ops_delete_is_confirm(file_plugin: FileOpsPlugin) -> None:
+    """Delete operations get CONFIRM approval."""
+    match = file_plugin.can_handle("delete the file test.txt")
+    assert match is not None
+    from sponge.plugins.base import ApprovalLevel
+
+    assert match.approval == ApprovalLevel.CONFIRM
+
+
+def test_file_ops_list_is_allow(file_plugin: FileOpsPlugin) -> None:
+    """List operations get ALLOW approval."""
+    match = file_plugin.can_handle("list files in src/")
+    assert match is not None
+    from sponge.plugins.base import ApprovalLevel
+
+    assert match.approval == ApprovalLevel.ALLOW
