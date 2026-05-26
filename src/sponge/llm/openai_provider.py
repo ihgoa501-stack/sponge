@@ -36,7 +36,18 @@ class OpenAIProvider(LLMProvider):
 
         client = AsyncOpenAI(api_key=self._api_key)
 
-        api_messages = [{"role": m.role, "content": m.content} for m in messages]
+        api_messages: list[dict[str, object]] = []
+        for m in messages:
+            if m.images:
+                # OpenAI: content array with text + image_url blocks.
+                blocks: list[dict[str, object]] = []
+                if m.content:
+                    blocks.append({"type": "text", "text": m.content})
+                for img in m.images:
+                    blocks.append({"type": "image_url", "image_url": {"url": img}})
+                api_messages.append({"role": m.role, "content": blocks})
+            else:
+                api_messages.append({"role": m.role, "content": m.content})
 
         try:
             stream = await client.chat.completions.create(

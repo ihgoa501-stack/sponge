@@ -6,32 +6,11 @@ responses for identical calls, saving the full model cost.
 """
 
 import hashlib
-import subprocess
+import json
 
 from sponge.cache.disk_store import DiskStore
+from sponge.cache.repo_state import get_repo_state
 from sponge.config.settings import Settings
-
-
-def _repo_state() -> str:
-    """Capture current git HEAD + dirty flag as a state marker.
-
-    Returns empty string if not in a git repo.
-    """
-    try:
-        head = subprocess.check_output(
-            ["git", "rev-parse", "HEAD"],
-            stderr=subprocess.DEVNULL,
-            text=True,
-        ).strip()
-        # Check for uncommitted changes
-        dirty = subprocess.check_output(
-            ["git", "status", "--porcelain"],
-            stderr=subprocess.DEVNULL,
-            text=True,
-        ).strip()
-        return f"{head}{':dirty' if dirty else ''}"
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return ""
 
 
 class ResultCache:
@@ -48,7 +27,7 @@ class ResultCache:
         system_prompt: str = "",
     ) -> str:
         """Build a SHA256 cache key from task inputs + repo state."""
-        state = _repo_state()
+        state = get_repo_state()
         ingredients = f"{task}|{model}|{system_prompt}|{state}"
         return hashlib.sha256(ingredients.encode()).hexdigest()
 
@@ -57,12 +36,24 @@ class ResultCache:
         task: str,
         model: str,
         system_prompt: str = "",
-    ) -> str | None:
-        """Return cached response or None on miss/expiry."""
+    ) -> tuple[str, float] | None:
+        """Return (cached_response, original_cost) or None on miss/expiry.
+
+        The original_cost is what the LLM call cost when first cached,
+        used as naive_cost on cache hits so the savings ledger is accurate.
+        """
         if not self._settings.cache_enabled:
             return None
         key = self.cache_key(task, model, system_prompt)
-        return self._store.get(key)
+        raw = self._store.get(key)
+        if raw is None:
+            return None
+        try:
+            data = json.loads(raw)
+            return (data["r"], data.get("c", 0.0))
+        except (json.JSONDecodeError, KeyError, TypeError):
+            # Legacy cache entries (plain text, no cost).
+            return (raw, 0.0)
 
     def set(
         self,
@@ -70,9 +61,11 @@ class ResultCache:
         model: str,
         system_prompt: str,
         response: str,
+        cost: float = 0.0,
     ) -> None:
-        """Store a response in cache."""
+        """Store a response + cost in cache as JSON."""
         if not self._settings.cache_enabled:
             return
         key = self.cache_key(task, model, system_prompt)
-        self._store.set(key, response, ttl_hours=self._settings.cache_ttl_hours)
+        payload = json.dumps({"r": response, "c": cost})
+        self._store.set(key, payload, ttl_hours=self._settings.cache_ttl_hours)

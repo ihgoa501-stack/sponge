@@ -19,6 +19,11 @@ body { font-family: -apple-system, system-ui, sans-serif; background: #1a1a2e; c
 #input-area button { padding: 12px 24px; background: #e94560; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
 #input-area button:hover { background: #c73652; }
 #input-area button:disabled { opacity: 0.5; cursor: default; }
+#attach-btn { padding: 12px 14px; background: #16213e; color: #e0e0e0; border: 1px solid #0f3460; border-radius: 8px; cursor: pointer; font-size: 16px; }
+#attach-btn:hover { border-color: #e94560; }
+#image-preview { display: flex; gap: 6px; flex-wrap: wrap; padding: 4px 0; }
+#image-preview img { height: 48px; border-radius: 4px; border: 1px solid #0f3460; }
+.msg .img-preview { max-width: 200px; max-height: 150px; border-radius: 4px; margin-top: 6px; }
 .msg { margin-bottom: 16px; line-height: 1.6; }
 .msg.user { color: #a0a0c0; }
 .msg.assistant { color: #e0e0e0; }
@@ -34,7 +39,10 @@ body { font-family: -apple-system, system-ui, sans-serif; background: #1a1a2e; c
 
 <div id="chat-panel">
   <div id="messages"></div>
+  <div id="image-preview"></div>
   <div id="input-area">
+    <input type="file" id="file-input" accept="image/*" style="display:none" multiple>
+    <button id="attach-btn" onclick="document.getElementById('file-input').click()">📎</button>
     <input type="text" id="msg-input" placeholder="Type your task..." autofocus>
     <button id="send-btn" onclick="send()">Send</button>
   </div>
@@ -55,6 +63,26 @@ body { font-family: -apple-system, system-ui, sans-serif; background: #1a1a2e; c
 <script>
 let callCount = 0, cacheHits = 0, pluginCalls = 0;
 let totalCost = 0, totalNaive = 0;
+let attachedImages = [];
+
+document.getElementById('file-input').addEventListener('change', async () => {
+  const files = document.getElementById('file-input').files;
+  for (const f of files) {
+    const b64 = await fileToBase64(f);
+    attachedImages.push(b64);
+    const img = document.createElement('img');
+    img.src = b64; img.title = f.name;
+    document.getElementById('image-preview').appendChild(img);
+  }
+});
+
+function fileToBase64(file) {
+  return new Promise((resolve) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.readAsDataURL(file);
+  });
+}
 
 document.getElementById('msg-input').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') send();
@@ -68,14 +96,22 @@ async function send() {
   input.disabled = true;
   document.getElementById('send-btn').disabled = true;
 
-  addMessage('user', msg);
+  const images = [...attachedImages];
+  attachedImages = [];
+  document.getElementById('image-preview').innerHTML = '';
+
+  let userHtml = escapeHtml(msg);
+  for (const img of images) {
+    userHtml += '<br><img class="img-preview" src="' + img + '">';
+  }
+  addMessage('user', userHtml);
   const aiDiv = addMessage('assistant', '<span class="loading"></span>');
 
   try {
     const resp = await fetch('/chat', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({message: msg}),
+      body: JSON.stringify({message: msg, images: images}),
     });
 
     const reader = resp.body.getReader();

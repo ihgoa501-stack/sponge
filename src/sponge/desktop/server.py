@@ -14,7 +14,7 @@ from sponge.cache.disk_store import DiskStore
 from sponge.cache.result_cache import ResultCache
 from sponge.cache.semantic_cache import SemanticCache
 from sponge.config.settings import Settings
-from sponge.core.agent import Agent
+from sponge.core.agent import Agent, AgentServices
 from sponge.core.task import Task
 from sponge.cost.ledger import build_report
 from sponge.cost.models import SavingsLedger
@@ -41,8 +41,10 @@ def _build_agent() -> Agent:
     sem_cache = SemanticCache(store=store)
     return Agent(
         provider, settings, cache, collector,
-        plugins=PluginRegistry(get_builtin_plugins()),
-        semantic_cache=sem_cache,
+        services=AgentServices(
+            plugins=PluginRegistry(get_builtin_plugins()),
+            semantic_cache=sem_cache,
+        ),
     )
 
 
@@ -60,13 +62,14 @@ async def chat(request: Request) -> StreamingResponse:
     """Stream an LLM response via Server-Sent Events."""
     body = await request.json()
     message = body.get("message", "").strip()
-    if not message:
+    images = body.get("images", [])
+    if not message and not images:
         return StreamingResponse(
             _empty(), media_type="text/event-stream"
         )
 
     agent = _build_agent()
-    task = Task(prompt=message)
+    task = Task(prompt=message or "Describe this image.", images=images or None)
 
     async def _stream() -> AsyncGenerator[str, None]:
         try:

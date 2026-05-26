@@ -12,8 +12,9 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-import subprocess
 from typing import TYPE_CHECKING
+
+from sponge.cache.repo_state import get_repo_state
 
 if TYPE_CHECKING:
     from sponge.cache.disk_store import DiskStore
@@ -46,14 +47,7 @@ class SemanticCache:
             self._load_from_disk()
 
     def _repo_state(self) -> str:
-        try:
-            return subprocess.check_output(
-                ["git", "rev-parse", "HEAD"],
-                stderr=subprocess.DEVNULL,
-                text=True,
-            ).strip()
-        except (subprocess.CalledProcessError, FileNotFoundError):
-            return ""
+        return get_repo_state()
 
     def _tokenize(self, text: str) -> set[str]:
         return set(text.lower().split())

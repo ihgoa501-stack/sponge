@@ -13,6 +13,7 @@ class Task:
     prompt: str
     model: str | None = None
     system_prompt: str = ""
+    images: list[str] | None = None
 
 
 @dataclass

@@ -1,7 +1,10 @@
 """LLM provider abstract base and stream event types."""
 
+import base64
+import mimetypes
 from collections.abc import AsyncIterator
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from pathlib import Path
 
 from sponge.cost.models import Usage
 
@@ -12,6 +15,17 @@ class Message:
 
     role: str  # "system", "user", "assistant"
     content: str
+    images: list[str] = field(default_factory=list)  # base64 data URIs
+
+
+def encode_image(path: str | Path) -> str:
+    """Encode an image file as a base64 data URI."""
+    p = Path(path)
+    mime, _ = mimetypes.guess_type(str(p))
+    if mime is None:
+        mime = "image/png"
+    data = base64.b64encode(p.read_bytes()).decode()
+    return f"data:{mime};base64,{data}"
 
 
 @dataclass

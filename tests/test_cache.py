@@ -42,15 +42,35 @@ def test_disk_store_expiry() -> None:
 
 
 def test_result_cache_hit() -> None:
-    """ResultCache returns cached response on exact match."""
+    """ResultCache returns cached response + cost on exact match."""
     with tempfile.TemporaryDirectory() as tmp:
         store = DiskStore(Path(tmp) / "store.db")
         settings = Settings(cache_enabled=True, cache_ttl_hours=24)
         cache = ResultCache(store, settings)
 
         assert cache.get("hello", "claude-sonnet-4") is None
-        cache.set("hello", "claude-sonnet-4", "", "world")
-        assert cache.get("hello", "claude-sonnet-4") == "world"
+        cache.set("hello", "claude-sonnet-4", "", "world", cost=0.001)
+        result = cache.get("hello", "claude-sonnet-4")
+        assert result is not None
+        assert result[0] == "world"
+        assert result[1] == 0.001
+
+
+def test_result_cache_legacy_entry() -> None:
+    """Legacy plain-text cache entries (no cost) return cost=0.0."""
+    with tempfile.TemporaryDirectory() as tmp:
+        store = DiskStore(Path(tmp) / "store.db")
+        settings = Settings(cache_enabled=True)
+        cache = ResultCache(store, settings)
+
+        # Simulate a legacy entry: store plain text directly.
+        key = cache.cache_key("legacy", "claude-sonnet-4", "")
+        store.set(key, "old response", ttl_hours=24)
+
+        result = cache.get("legacy", "claude-sonnet-4")
+        assert result is not None
+        assert result[0] == "old response"
+        assert result[1] == 0.0  # No cost in legacy entry
 
 
 def test_result_cache_miss_different_task() -> None:

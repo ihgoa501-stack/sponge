@@ -16,9 +16,13 @@ _MODEL_ENCODINGS: dict[str, str] = {
 
 
 def _guess_encoding(model: str) -> str | None:
-    """Try to find a matching tiktoken encoding for a model."""
+    """Try to find a matching tiktoken encoding for a model.
+
+    Sorted by key length (longest first) so more specific prefixes
+    match before shorter ones (e.g. 'gpt-4o' before 'gpt-4').
+    """
     model_lower = model.lower()
-    for prefix, encoding in _MODEL_ENCODINGS.items():
+    for prefix, encoding in sorted(_MODEL_ENCODINGS.items(), key=lambda x: -len(x[0])):
         if model_lower.startswith(prefix):
             return encoding
     return None

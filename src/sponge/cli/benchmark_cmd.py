@@ -18,7 +18,7 @@ from sponge.cache.disk_store import DiskStore
 from sponge.cache.result_cache import ResultCache
 from sponge.cache.semantic_cache import SemanticCache
 from sponge.config.settings import Settings
-from sponge.core.agent import Agent
+from sponge.core.agent import Agent, AgentServices
 from sponge.core.task import Task
 from sponge.llm.factory import create_provider
 from sponge.plugins.builtins import get_builtin_plugins
@@ -181,8 +181,10 @@ def run_benchmark(
     sem_cache = SemanticCache(store=store)
     agent = Agent(
         provider, settings, cache, collector,
-        plugins=PluginRegistry(get_builtin_plugins()),
-        semantic_cache=sem_cache,
+        services=AgentServices(
+            plugins=PluginRegistry(get_builtin_plugins()),
+            semantic_cache=sem_cache,
+        ),
     )
 
     model = settings.model

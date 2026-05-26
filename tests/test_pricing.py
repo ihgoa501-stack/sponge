@@ -35,6 +35,26 @@ def test_get_model_pricing_all_providers() -> None:
         assert pricing.input_per_1k > 0
 
 
+def test_get_model_pricing_devmode_fallback() -> None:
+    """When importlib.resources fails, falls back to relative file path."""
+    from unittest import mock
+
+    from sponge.cost.pricing import _load_pricing_data, _pricing_cache
+
+    # Clear cache so we re-load.
+    import sponge.cost.pricing as pmod
+    old_cache = pmod._pricing_cache
+    pmod._pricing_cache = None
+
+    try:
+        # Make importlib.resources.files raise ModuleNotFoundError.
+        with mock.patch("importlib.resources.files", side_effect=ModuleNotFoundError):
+            data = _load_pricing_data()
+            assert "providers" in data
+    finally:
+        pmod._pricing_cache = old_cache
+
+
 def _first_model(provider: str) -> str:
     """Get the first model for a provider."""
     from sponge.cost.pricing import _get_pricing_data

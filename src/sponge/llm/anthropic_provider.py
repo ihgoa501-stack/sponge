@@ -45,6 +45,27 @@ class AnthropicProvider(LLMProvider):
         for msg in messages:
             if msg.role == "system":
                 system_prompt += msg.content + "\n"
+            elif msg.images:
+                # Anthropic: content blocks with text + images.
+                blocks: list[dict[str, object]] = []
+                for img in msg.images:
+                    if img.startswith("data:"):
+                        header, b64data = img.split(",", 1)
+                        mime = header.split(";")[0].replace("data:", "")
+                    else:
+                        mime = "image/png"
+                        b64data = img
+                    blocks.append({
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": mime,
+                            "data": b64data,
+                        },
+                    })
+                if msg.content:
+                    blocks.append({"type": "text", "text": msg.content})
+                api_messages.append({"role": msg.role, "content": blocks})
             else:
                 api_messages.append({"role": msg.role, "content": msg.content})
 

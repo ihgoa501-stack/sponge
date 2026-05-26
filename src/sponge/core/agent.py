@@ -3,6 +3,7 @@
 import hashlib
 import logging
 import uuid
+from dataclasses import dataclass
 from datetime import UTC, datetime
 
 from sponge.cache.result_cache import ResultCache
@@ -28,6 +29,18 @@ from sponge.utils.retry import retry
 logger = logging.getLogger("sponge.core.agent")
 
 
+@dataclass
+class AgentServices:
+    """Optional services that extend the agent with Phase 2+ capabilities."""
+
+    plugins: PluginRegistry | None = None
+    decomposer: TaskDecomposer | None = None
+    condenser: SubAgentCondenser | None = None
+    context_planner: ContextPlanner | None = None
+    semantic_cache: SemanticCache | None = None
+    memory: ProjectMemory | None = None
+
+
 class Agent:
     """Executes tasks through an LLM provider with caching and cost tracking.
 
@@ -40,23 +53,13 @@ class Agent:
         settings: Settings,
         cache: ResultCache,
         collector: TelemetryCollector,
-        plugins: PluginRegistry | None = None,
-        decomposer: TaskDecomposer | None = None,
-        condenser: SubAgentCondenser | None = None,
-        context_planner: ContextPlanner | None = None,
-        semantic_cache: SemanticCache | None = None,
-        memory: ProjectMemory | None = None,
+        services: AgentServices | None = None,
     ) -> None:
         self._provider = provider
         self._settings = settings
         self._cache = cache
         self._collector = collector
-        self._plugins = plugins
-        self._decomposer = decomposer
-        self._condenser = condenser
-        self._context_planner = context_planner
-        self._semantic_cache = semantic_cache
-        self._memory = memory
+        self._svc = services or AgentServices()
 
     async def run(
         self,
@@ -77,8 +80,8 @@ class Agent:
         task_hash = hashlib.sha256(task.prompt.encode()).hexdigest()[:16]
 
         # 0. Plugin routing — bypass LLM entirely if a plugin can handle this.
-        if self._plugins is not None:
-            match = self._plugins.best_match(task.prompt)
+        if self._svc.plugins is not None:
+            match = self._svc.plugins.best_match(task.prompt)
             if match and match.confidence >= 0.8:
                 from sponge.plugins.base import ApprovalLevel, PluginContext
 
@@ -98,7 +101,7 @@ class Agent:
                         match.plugin.name,
                         match.confidence * 100,
                     )
-                    plugin_result = await self._plugins.execute(
+                    plugin_result = await self._svc.plugins.execute(
                         match, PluginContext(task=task.prompt)
                     )
                     entry = CostEntry(
@@ -126,8 +129,9 @@ class Agent:
         # 1. Check exact cache.
         cached = self._cache.get(task.prompt, model, task.system_prompt)
         if cached is not None:
+            cached_response, original_cost = cached
             logger.info("Cache hit for task hash=%s", task_hash)
-            entry = self._make_cache_hit_entry(model)
+            entry = self._make_cache_hit_entry(model, naive_cost=original_cost)
             fp = self._make_fingerprint(
                 session_id=session_id,
                 task_hash=task_hash,
@@ -140,7 +144,7 @@ class Agent:
             self._collector.log_call(fp)
             return TaskResult(
                 task=task,
-                response=cached,
+                response=cached_response,
                 cost_entry=entry,
                 fingerprint=fp,
                 cache_hit=True,
@@ -148,8 +152,8 @@ class Agent:
             )
 
         # 1.5. Check semantic cache.
-        if self._semantic_cache is not None:
-            sem_cached = self._semantic_cache.get(task.prompt)
+        if self._svc.semantic_cache is not None:
+            sem_cached = self._svc.semantic_cache.get(task.prompt)
             if sem_cached is not None:
                 logger.info("Semantic cache hit for task hash=%s", task_hash)
                 entry = self._make_cache_hit_entry(model)
@@ -189,9 +193,9 @@ class Agent:
         self._collector.log_call(fp)
 
         # 4. Write to caches.
-        self._cache.set(task.prompt, model, task.system_prompt, response)
-        if self._semantic_cache is not None:
-            self._semantic_cache.set(task.prompt, response)
+        self._cache.set(task.prompt, model, task.system_prompt, response, cost=cost_entry.cost)
+        if self._svc.semantic_cache is not None:
+            self._svc.semantic_cache.set(task.prompt, response)
 
         logger.info(
             "Call complete: cost=$%.6f naive=$%.6f",
@@ -218,13 +222,13 @@ class Agent:
 
         If no decomposer is configured, falls back to regular run().
         """
-        if self._decomposer is None:
+        if self._svc.decomposer is None:
             return await self.run(task)
 
         model = task.model or self._settings.model
 
         # 1. Decompose.
-        decompose_result = await self._decomposer.decompose(task.prompt)
+        decompose_result = await self._svc.decomposer.decompose(task.prompt)
 
         if not decompose_result.was_decomposed or len(decompose_result.sub_tasks) <= 1:
             return await self.run(task)
@@ -239,8 +243,8 @@ class Agent:
         for st in decompose_result.sub_tasks:
             # Plan context.
             ctx_items: list[str] = []
-            if self._context_planner is not None:
-                plan = self._context_planner.plan(st.id, st.description, st.context_hint)
+            if self._svc.context_planner is not None:
+                plan = self._svc.context_planner.plan(st.id, st.description, st.context_hint)
                 ctx_items = [item.path for item in plan.needed]
 
             # Execute sub-task (cheap LLM call with minimal context).
@@ -256,8 +260,8 @@ class Agent:
             total_out += sub_result.cost_entry.usage.tokens_out
 
             # Mark context as loaded.
-            if self._context_planner is not None:
-                self._context_planner.mark_loaded(ctx_items)
+            if self._svc.context_planner is not None:
+                self._svc.context_planner.mark_loaded(ctx_items)
 
         # 4. Condense results.
         raw_output = "\n\n".join(
@@ -266,8 +270,8 @@ class Agent:
         )
 
         condensed: CondensedResult | None = None
-        if self._condenser is not None:
-            condensed = await self._condenser.condense(raw_output)
+        if self._svc.condenser is not None:
+            condensed = await self._svc.condenser.condense(raw_output)
 
         session_id = uuid.uuid4().hex[:12]
         task_hash = hashlib.sha256(task.prompt.encode()).hexdigest()[:16]
@@ -394,13 +398,16 @@ class Agent:
     def _build_messages(self, task: Task) -> list[Message]:
         messages: list[Message] = []
         # Inject project memory as first system message.
-        if self._memory is not None:
-            mem_prompt = self._memory.to_system_prompt()
+        if self._svc.memory is not None:
+            mem_prompt = self._svc.memory.to_system_prompt()
             if mem_prompt:
                 messages.append(Message(role="system", content=mem_prompt))
         if task.system_prompt:
             messages.append(Message(role="system", content=task.system_prompt))
-        messages.append(Message(role="user", content=task.prompt))
+        user_msg = Message(role="user", content=task.prompt)
+        if task.images:
+            user_msg.images = task.images
+        messages.append(user_msg)
         return messages
 
     async def _stream_with_retry(
@@ -426,12 +433,12 @@ class Agent:
 
         return await retry(_do_stream)
 
-    def _make_cache_hit_entry(self, model: str) -> CostEntry:
+    def _make_cache_hit_entry(self, model: str, naive_cost: float = 0.0) -> CostEntry:
         return CostEntry(
             usage=Usage(tokens_in=0, tokens_out=0),
             model=model,
             cost=0.0,
-            naive_cost=0.0,
+            naive_cost=naive_cost,
         )
 
     def _make_fingerprint(
@@ -444,16 +451,9 @@ class Agent:
         experiment_id: str | None = None,
         experiment_group: str | None = None,
     ) -> CostFingerprint:
-        import subprocess
+        from sponge.cache.repo_state import get_repo_state
 
-        try:
-            repo = subprocess.check_output(
-                ["git", "rev-parse", "HEAD"],
-                stderr=subprocess.DEVNULL,
-                text=True,
-            ).strip()
-        except (subprocess.CalledProcessError, FileNotFoundError):
-            repo = ""
+        repo = get_repo_state()
 
         return CostFingerprint(
             session_id=session_id,

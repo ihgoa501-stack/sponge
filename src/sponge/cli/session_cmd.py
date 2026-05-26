@@ -9,7 +9,7 @@ from sponge.cache.disk_store import DiskStore
 from sponge.cache.result_cache import ResultCache
 from sponge.cache.semantic_cache import SemanticCache
 from sponge.config.settings import Settings
-from sponge.core.agent import Agent
+from sponge.core.agent import Agent, AgentServices
 from sponge.core.session import (
     create_session,
     list_sessions,
@@ -109,9 +109,11 @@ def session_chat(
     mem = ProjectMemory()
     agent = Agent(
         provider, settings, cache, collector,
-        plugins=PluginRegistry(get_builtin_plugins()),
-        semantic_cache=sem_cache,
-        memory=mem,
+        services=AgentServices(
+            plugins=PluginRegistry(get_builtin_plugins()),
+            semantic_cache=sem_cache,
+            memory=mem,
+        ),
     )
 
     try:

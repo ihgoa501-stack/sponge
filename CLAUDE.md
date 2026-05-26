@@ -3,7 +3,7 @@
 ## Project Identity
 
 - **Mission**: Reduce LLM cost to **1/10 of the original** through agent engineering architecture alone — same model, same task quality, one-tenth the tokens.
-- **Status**: Phase 0-2 complete. Agent loop, cost fingerprint, self-tuning closed loop, 3 providers, plugin routing, context compression, 61 tests. 48 source files.
+- **Status**: Phase 0-3 components implemented. Agent loop, cost fingerprint, self-tuning closed loop, 4 providers, plugin routing, context compression, semantic cache, task decomposition, sub-agent condensation, progressive context loading, memory-based reuse. 106 tests, 59 source files. Some Phase 3 modules need additional test coverage (desktop, MCP, memory store).
 - **Core principle**: The agent architecture itself is the cost-reduction engine. Not bolt-on cache layers. Not model downgrading. Every design decision — how tasks are decomposed, how context is loaded, how sub-agents return results, how memory is structured — exists to slash token consumption. The target is 1/10.
 - **Name metaphor**: Like a sponge — absorb maximum context, squeeze out maximum value. Every token sent to the model must justify its existence.
 - **Key differentiator**: Not features — architecture. Competitors add caching and compression as afterthoughts. Sponge designs the agent loop from first principles around token minimization. Task decomposition, progressive context loading, sub-agent condensation, and memory-based reuse are not features on a roadmap — they are the roadmap. Everything else is secondary.
@@ -55,8 +55,9 @@ The savings ledger tracks each mechanism independently, so the 1/10 claim is aud
 
 ## Coding Capability Status
 
-- Phase 0-2 complete: single/multi-turn conversations, cost tracking, self-tuning, context compression, plugin routing, 3 LLM providers.
-- Phase 3+: task decomposition, sub-agent condensation, progressive context loading, memory-based reuse — the architectural layers that drive toward 1/10.
+- **Phase 0-2 (complete, tested):** single/multi-turn conversations, cost tracking, self-tuning, context compression, plugin routing, 4 LLM providers, exact + semantic cache, savings ledger, CLI.
+- **Phase 3 (implemented, needs test coverage):** task decomposition, sub-agent condensation, progressive context loading (ContextPlanner), memory-based reuse (ProjectMemory), desktop server, MCP plugin.
+- **Phase 4 (planned):** approval gates & permissions (stub at `src/sponge/approval/`).
 
 ## What is an Agent Harness
 

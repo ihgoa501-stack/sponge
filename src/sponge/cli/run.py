@@ -9,10 +9,11 @@ from sponge.cache.disk_store import DiskStore
 from sponge.cache.result_cache import ResultCache
 from sponge.cache.semantic_cache import SemanticCache
 from sponge.config.settings import Settings
-from sponge.core.agent import Agent
+from sponge.core.agent import Agent, AgentServices
 from sponge.core.task import Task
 from sponge.cost.ledger import build_report
 from sponge.cost.models import SavingsLedger
+from sponge.llm.base import encode_image
 from sponge.llm.factory import create_provider
 from sponge.memory.store import ProjectMemory
 from sponge.plugins.builtins import get_builtin_plugins
@@ -39,6 +40,9 @@ def run_task(
     auto_approve: bool = typer.Option(
         False, "--auto-approve", help="Auto-approve plugin operations (writes, deletes)."
     ),
+    image: str = typer.Option(
+        "", "--image", "-i", help="Attach an image file (base64 encoded)."
+    ),
 ) -> None:
     """Execute a task and show the response with cost breakdown."""
     settings = Settings()
@@ -63,9 +67,11 @@ def run_task(
     mem = ProjectMemory()
     agent = Agent(
         provider, settings, cache, collector,
-        plugins=PluginRegistry(get_builtin_plugins()),
-        semantic_cache=sem_cache,
-        memory=mem,
+        services=AgentServices(
+            plugins=PluginRegistry(get_builtin_plugins()),
+            semantic_cache=sem_cache,
+            memory=mem,
+        ),
     )
 
     # Shadow A/B injection: check for testing proposals.
@@ -93,11 +99,14 @@ def run_task(
     except Exception:
         pass  # If proposals DB doesn't exist yet, skip silently.
 
+    # Encode image if provided.
+    images = [encode_image(image)] if image else None
+
     # Run the task.
     try:
         result = asyncio.run(
             agent.run(
-                Task(prompt=task, model=settings.model),
+                Task(prompt=task, model=settings.model, images=images),
                 experiment_id=experiment_id,
                 experiment_group=experiment_group,
             )

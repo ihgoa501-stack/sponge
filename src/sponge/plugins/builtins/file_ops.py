@@ -30,6 +30,8 @@ READ_KEYWORDS = [
     r"\bdisplay\s+(?:the\s+)?(?:file|contents\s+of)\b",
     r"\bwhat(?:\'s|\s+is)\s+in\s+",
     r"\bprint\s+(?:the\s+)?(?:contents\s+of|file)\b",
+    r"\bread\s+\S+(?:\.\w{1,10}|/)",  # "read filename.ext" or "read path/"
+    r"\bget\s+(?:the\s+)?contents?\s+of\b",
 ]
 
 LIST_KEYWORDS = [
@@ -42,6 +44,7 @@ LIST_KEYWORDS = [
 
 WRITE_KEYWORDS = [
     r"\bwrite\s+.+\s+to\s+",
+    r"\bwrite\s+.+\s+with\s+(?:content|text|data)\b",  # "write path with content ..."
     r"\bcreate\s+(?:a\s+)?file\b",
     r"\bsave\s+.+\s+to\s+",
     r"\bappend\s+.+\s+to\s+",
@@ -279,8 +282,18 @@ class FileOpsPlugin(Plugin):
         if m:
             content = m.group(1).strip().strip("\"'")
             target_path = m.group(2).strip()
-        elif paths:
+        # Try "write PATH with content CONTENT" pattern.
+        else:
+            m = re.search(
+                r"\bwrite\s+([~\w./-]+)\s+with\s+(?:content|text|data)\s+(.+)",
+                task, re.IGNORECASE,
+            )
+            if m:
+                target_path = m.group(1).strip()
+                content = m.group(2).strip().strip("\"'")
+        if not target_path and paths:
             target_path = paths[-1]  # last path extracted
+        if not content:
             content = task  # fallback: whole task as content
 
         if not target_path:
