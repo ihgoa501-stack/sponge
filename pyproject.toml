@@ -14,7 +14,7 @@ authors = [
 ]
 keywords = ["ai", "agent", "llm", "cost-optimization", "harness"]
 classifiers = [
-    "Development Status :: 1 - Planning",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.12",
@@ -50,8 +50,15 @@ openai = [
 deepseek = [
     "openai>=1.30",  # DeepSeek uses OpenAI-compatible API
 ]
+openrouter = [
+    "openai>=1.30",  # OpenRouter uses OpenAI-compatible API
+]
+desktop = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+]
 all = [
-    "sponge-ai[anthropic,openai,deepseek]",
+    "sponge-ai[anthropic,openai,deepseek,openrouter,desktop]",
 ]
 
 [project.scripts]
@@ -60,6 +67,9 @@ sponge = "sponge.cli.app:app"
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["sponge*"]
+
+[tool.setuptools.package-data]
+sponge = ["desktop/static/*"]
 
 [tool.ruff]
 line-length = 100

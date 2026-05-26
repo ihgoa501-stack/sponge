@@ -7,12 +7,16 @@ import typer
 
 from sponge.cache.disk_store import DiskStore
 from sponge.cache.result_cache import ResultCache
+from sponge.cache.semantic_cache import SemanticCache
 from sponge.config.settings import Settings
 from sponge.core.agent import Agent
 from sponge.core.task import Task
 from sponge.cost.ledger import build_report
 from sponge.cost.models import SavingsLedger
 from sponge.llm.factory import create_provider
+from sponge.memory.store import ProjectMemory
+from sponge.plugins.builtins import get_builtin_plugins
+from sponge.plugins.registry import PluginRegistry
 from sponge.telemetry.collector import TelemetryCollector
 from sponge.telemetry.tuner import ProposalStore
 
@@ -32,6 +36,9 @@ def run_task(
     no_stream: bool = typer.Option(  # noqa: ARG001
         False, "--no-stream", help="Disable streaming output."
     ),
+    auto_approve: bool = typer.Option(
+        False, "--auto-approve", help="Auto-approve plugin operations (writes, deletes)."
+    ),
 ) -> None:
     """Execute a task and show the response with cost breakdown."""
     settings = Settings()
@@ -39,6 +46,8 @@ def run_task(
         settings.model = model
     if no_cache:
         settings.cache_enabled = False
+    if auto_approve:
+        settings.auto_approve = True
 
     # Build infrastructure.
     try:
@@ -50,7 +59,14 @@ def run_task(
     store = DiskStore(CACHE_DB)
     cache = ResultCache(store, settings)
     collector = TelemetryCollector(TELEMETRY_DB)
-    agent = Agent(provider, settings, cache, collector)
+    sem_cache = SemanticCache(store=store)
+    mem = ProjectMemory()
+    agent = Agent(
+        provider, settings, cache, collector,
+        plugins=PluginRegistry(get_builtin_plugins()),
+        semantic_cache=sem_cache,
+        memory=mem,
+    )
 
     # Shadow A/B injection: check for testing proposals.
     experiment_id: str | None = None
@@ -115,7 +131,8 @@ def run_task(
         typer.echo(report.format_text())
 
     if result.cache_hit:
-        typer.echo("(served from cache)")
+        source = result.cache_source or "cache"
+        typer.echo(f"(served from {source} cache)")
 
 
 def _apply_shadow_override(settings: Settings, param: str, value: object) -> None:

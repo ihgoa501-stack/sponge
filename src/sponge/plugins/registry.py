@@ -7,10 +7,13 @@ class PluginRegistry:
     """Registry of all available plugins."""
 
     def __init__(self, plugins: list[Plugin] | None = None) -> None:
-        self._plugins: list[Plugin] = plugins or []
+        self._plugins: list[Plugin] = sorted(
+            plugins or [], key=lambda p: p.priority
+        )
 
     def register(self, plugin: Plugin) -> None:
         self._plugins.append(plugin)
+        self._plugins.sort(key=lambda p: p.priority)
 
     def best_match(self, task: str) -> PluginMatch | None:
         """Find the best plugin for a task. Returns None if no match."""

@@ -7,6 +7,7 @@ import typer
 
 from sponge.cache.disk_store import DiskStore
 from sponge.cache.result_cache import ResultCache
+from sponge.cache.semantic_cache import SemanticCache
 from sponge.config.settings import Settings
 from sponge.core.agent import Agent
 from sponge.core.session import (
@@ -18,6 +19,9 @@ from sponge.core.session import (
 from sponge.cost.ledger import build_report
 from sponge.cost.models import SavingsLedger
 from sponge.llm.factory import create_provider
+from sponge.memory.store import ProjectMemory
+from sponge.plugins.builtins import get_builtin_plugins
+from sponge.plugins.registry import PluginRegistry
 from sponge.telemetry.collector import TelemetryCollector
 
 session_app = typer.Typer(name="session", help="Multi-turn conversation sessions.")
@@ -101,7 +105,14 @@ def session_chat(
     store = DiskStore(CACHE_DB)
     cache = ResultCache(store, settings)
     collector = TelemetryCollector(TELEMETRY_DB)
-    agent = Agent(provider, settings, cache, collector)
+    sem_cache = SemanticCache(store=store)
+    mem = ProjectMemory()
+    agent = Agent(
+        provider, settings, cache, collector,
+        plugins=PluginRegistry(get_builtin_plugins()),
+        semantic_cache=sem_cache,
+        memory=mem,
+    )
 
     try:
         result = asyncio.run(agent.run_with_history(session, message, max_history=max_history))

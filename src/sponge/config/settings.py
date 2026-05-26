@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     budget_per_session: float = 10.00
     max_steps: int = 50
 
+    # Approval
+    auto_approve: bool = False
+
     # Cache
     cache_enabled: bool = True
     cache_ttl_hours: int = 24
@@ -39,3 +42,4 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
     openai_api_key: str = ""
     deepseek_api_key: str = ""
+    openrouter_api_key: str = ""

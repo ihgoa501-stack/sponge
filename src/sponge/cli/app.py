@@ -3,10 +3,17 @@
 import typer
 
 from sponge import __version__
+from sponge.cli.benchmark_cmd import run_benchmark
 from sponge.cli.config_cmd import config_app
+from sponge.cli.cost_cmd import cost_app
+from sponge.cli.desktop_cmd import run_desktop
+from sponge.cli.memory_cmd import memory_app
 from sponge.cli.run import run_task
 from sponge.cli.session_cmd import session_app
 from sponge.cli.tune_cmd import tune_app
+from sponge.utils.logging import setup_logging
+
+setup_logging()
 
 app = typer.Typer(
     name="sponge",
@@ -15,9 +22,13 @@ app = typer.Typer(
 
 # Register subcommands.
 app.command(name="run")(run_task)
+app.command(name="benchmark")(run_benchmark)
+app.command(name="desktop")(run_desktop)
 app.add_typer(config_app, name="config")
 app.add_typer(session_app, name="session")
 app.add_typer(tune_app, name="tune")
+app.add_typer(memory_app, name="memory")
+app.add_typer(cost_app, name="cost")
 
 
 @app.callback(invoke_without_command=True)

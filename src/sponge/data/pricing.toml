@@ -56,6 +56,26 @@ output = 1.10
 input = 0.55
 output = 2.19
 
+[providers.deepseek.models.deepseek-v4-pro]
+input = 0.55
+output = 2.19
+
+[providers.deepseek.models.deepseek-v4-flash]
+input = 0.27
+output = 1.10
+
+[providers.openrouter]
+homepage = "https://openrouter.ai/models"
+note = "OpenRouter aggregates many providers. Prices vary by model. Models listed below are approximate."
+
+[providers.openrouter.models."deepseek/deepseek-v4-flash:free"]
+input = 0.00
+output = 0.00
+
+[providers.openrouter.models."deepseek/deepseek-v4-pro:free"]
+input = 0.00
+output = 0.00
+
 [meta]
 version = "0.1.0-dev"
 generated = "2026-05-24T00:00:00Z"

@@ -45,6 +45,7 @@ class Plugin(ABC):
     name: str = ""
     description: str = ""
     approval: ApprovalLevel = ApprovalLevel.CONFIRM
+    priority: int = 0  # Lower = checked first
 
     @abstractmethod
     def can_handle(self, task: str) -> PluginMatch | None:

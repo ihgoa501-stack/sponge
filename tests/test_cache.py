@@ -85,3 +85,20 @@ def test_disk_store_cleanup_expired() -> None:
         assert removed >= 1
         assert store.get("keep") == "val"
         assert store.get("expire") is None
+
+
+def test_disk_store_list_by_prefix() -> None:
+    """list_by_prefix returns matching non-expired entries."""
+    with tempfile.TemporaryDirectory() as tmp:
+        store = DiskStore(Path(tmp) / "store.db")
+        store.set("sem:abc", "v1", ttl_hours=24)
+        store.set("sem:xyz", "v2", ttl_hours=24)
+        store.set("other:1", "v3", ttl_hours=24)
+        store.set("sem:exp", "v4", ttl_hours=0)
+
+        results = store.list_by_prefix("sem:")
+        assert len(results) == 2
+        keys = {r[0] for r in results}
+        assert "sem:abc" in keys
+        assert "sem:xyz" in keys
+        assert "sem:exp" not in keys  # expired

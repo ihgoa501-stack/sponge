@@ -24,6 +24,12 @@ def create_provider(settings: Settings) -> LLMProvider:
 
         return DeepSeekProvider(settings)
 
+    if provider_name == "openrouter":
+        from sponge.llm.openrouter_provider import OpenRouterProvider
+
+        return OpenRouterProvider(settings)
+
     raise ConfigError(
-        f"Unknown provider '{settings.provider}'. Supported: anthropic, openai, deepseek"
+        f"Unknown provider '{settings.provider}'."
+        " Supported: anthropic, openai, deepseek, openrouter"
     )

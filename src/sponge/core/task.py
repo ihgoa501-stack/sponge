@@ -24,3 +24,4 @@ class TaskResult:
     cost_entry: CostEntry
     fingerprint: CostFingerprint
     cache_hit: bool
+    cache_source: str = ""  # "exact", "semantic", or ""

@@ -66,3 +66,12 @@ class DiskStore:
             cursor = conn.execute("DELETE FROM store WHERE expires_at < ?", (time.time(),))
             conn.commit()
             return cursor.rowcount
+
+    def list_by_prefix(self, prefix: str) -> list[tuple[str, str]]:
+        """Return (key, value) pairs for all non-expired keys with given prefix."""
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT key, value FROM store WHERE key LIKE ? AND expires_at >= ?",
+                (prefix + "%", time.time()),
+            ).fetchall()
+        return [(str(r[0]), str(r[1])) for r in rows]

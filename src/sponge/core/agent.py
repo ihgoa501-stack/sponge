@@ -6,6 +6,7 @@ import uuid
 from datetime import UTC, datetime
 
 from sponge.cache.result_cache import ResultCache
+from sponge.cache.semantic_cache import SemanticCache
 from sponge.config.settings import Settings
 from sponge.core.condenser import CondensedResult, SubAgentCondenser
 from sponge.core.context import ContextCompressor
@@ -18,9 +19,11 @@ from sponge.cost.pricing import get_model_pricing
 from sponge.cost.tracker import CostTracker
 from sponge.llm.base import ContentDelta, LLMProvider, Message, UsageEvent
 from sponge.llm.token_counter import count_tokens
+from sponge.memory.store import ProjectMemory
 from sponge.plugins.registry import PluginRegistry
 from sponge.telemetry.collector import TelemetryCollector
 from sponge.telemetry.models import CostFingerprint
+from sponge.utils.retry import retry
 
 logger = logging.getLogger("sponge.core.agent")
 
@@ -41,6 +44,8 @@ class Agent:
         decomposer: TaskDecomposer | None = None,
         condenser: SubAgentCondenser | None = None,
         context_planner: ContextPlanner | None = None,
+        semantic_cache: SemanticCache | None = None,
+        memory: ProjectMemory | None = None,
     ) -> None:
         self._provider = provider
         self._settings = settings
@@ -50,6 +55,8 @@ class Agent:
         self._decomposer = decomposer
         self._condenser = condenser
         self._context_planner = context_planner
+        self._semantic_cache = semantic_cache
+        self._memory = memory
 
     async def run(
         self,
@@ -73,31 +80,48 @@ class Agent:
         if self._plugins is not None:
             match = self._plugins.best_match(task.prompt)
             if match and match.confidence >= 0.8:
-                logger.info("Plugin match: %s (%.0f%%)", match.plugin.name, match.confidence * 100)
-                from sponge.plugins.base import PluginContext
+                from sponge.plugins.base import ApprovalLevel, PluginContext
 
-                plugin_result = await self._plugins.execute(match, PluginContext(task=task.prompt))
-                entry = CostEntry(
-                    usage=Usage(tokens_in=0, tokens_out=0),
-                    model=model,
-                    cost=0.0,
-                    naive_cost=0.01,  # rough estimate of LLM cost
-                )
-                fp = self._make_fingerprint(
-                    session_id=session_id,
-                    task_hash=task_hash,
-                    model=model,
-                    cost_entry=entry,
-                    cache_hit=False,
-                )
-                self._collector.log_call(fp)
-                return TaskResult(
-                    task=task,
-                    response=plugin_result.output,
-                    cost_entry=entry,
-                    fingerprint=fp,
-                    cache_hit=False,
-                )
+                # Check approval level.
+                if match.plugin.approval == ApprovalLevel.REJECT:
+                    logger.info("Plugin %s rejected by policy", match.plugin.name)
+                elif (
+                    match.plugin.approval == ApprovalLevel.CONFIRM
+                    and not self._settings.auto_approve
+                ):
+                    logger.info(
+                        "Plugin %s requires confirmation (use --auto-approve)", match.plugin.name
+                    )
+                else:
+                    logger.info(
+                        "Plugin match: %s (%.0f%%), executing",
+                        match.plugin.name,
+                        match.confidence * 100,
+                    )
+                    plugin_result = await self._plugins.execute(
+                        match, PluginContext(task=task.prompt)
+                    )
+                    entry = CostEntry(
+                        usage=Usage(tokens_in=0, tokens_out=0),
+                        model=model,
+                        cost=0.0,
+                        naive_cost=0.01,
+                    )
+                    fp = self._make_fingerprint(
+                        session_id=session_id,
+                        task_hash=task_hash,
+                        model=model,
+                        cost_entry=entry,
+                        cache_hit=False,
+                    )
+                    self._collector.log_call(fp)
+                    return TaskResult(
+                        task=task,
+                        response=plugin_result.output,
+                        cost_entry=entry,
+                        fingerprint=fp,
+                        cache_hit=False,
+                    )
 
         # 1. Check exact cache.
         cached = self._cache.get(task.prompt, model, task.system_prompt)
@@ -120,22 +144,37 @@ class Agent:
                 cost_entry=entry,
                 fingerprint=fp,
                 cache_hit=True,
+                cache_source="exact",
             )
 
-        # 2. Stream from provider.
+        # 1.5. Check semantic cache.
+        if self._semantic_cache is not None:
+            sem_cached = self._semantic_cache.get(task.prompt)
+            if sem_cached is not None:
+                logger.info("Semantic cache hit for task hash=%s", task_hash)
+                entry = self._make_cache_hit_entry(model)
+                fp = self._make_fingerprint(
+                    session_id=session_id,
+                    task_hash=task_hash,
+                    model=model,
+                    cost_entry=entry,
+                    cache_hit=True,
+                    experiment_id=experiment_id,
+                    experiment_group=experiment_group,
+                )
+                self._collector.log_call(fp)
+                return TaskResult(
+                    task=task,
+                    response=sem_cached,
+                    cost_entry=entry,
+                    fingerprint=fp,
+                    cache_hit=True,
+                    cache_source="semantic",
+                )
+
+        # 2. Stream from provider (with retry).
         messages = self._build_messages(task)
-        response_chunks: list[str] = []
-        tracker = CostTracker(get_model_pricing(self._settings.provider, model))
-
-        async for event in self._provider.stream(messages):
-            match event:
-                case ContentDelta(text=text):
-                    response_chunks.append(text)
-                case UsageEvent(usage=usage):
-                    tracker.record_usage(usage)
-
-        response = "".join(response_chunks)
-        cost_entry = tracker.finalize(model)
+        response, cost_entry = await self._stream_with_retry(messages, model)
 
         # 3. Record fingerprint.
         fp = self._make_fingerprint(
@@ -149,8 +188,10 @@ class Agent:
         )
         self._collector.log_call(fp)
 
-        # 4. Write to cache.
+        # 4. Write to caches.
         self._cache.set(task.prompt, model, task.system_prompt, response)
+        if self._semantic_cache is not None:
+            self._semantic_cache.set(task.prompt, response)
 
         logger.info(
             "Call complete: cost=$%.6f naive=$%.6f",
@@ -307,19 +348,9 @@ class Agent:
             ratio,
         )
 
-        # Stream from provider.
-        response_chunks: list[str] = []
-        tracker = CostTracker(get_model_pricing(self._settings.provider, model))
-
-        async for event in self._provider.stream(messages):
-            match event:
-                case ContentDelta(text=text):
-                    response_chunks.append(text)
-                case UsageEvent(usage=usage):
-                    tracker.record_usage(usage)
-
-        response = "".join(response_chunks)
-        cost_entry = tracker.finalize(model)
+        # Stream from provider (with retry).
+        model_name = session.model or self._settings.model
+        response, cost_entry = await self._stream_with_retry(messages, model_name)
 
         # Append turns to session.
         session.add_turn(Turn(role="user", content=user_message))
@@ -362,10 +393,38 @@ class Agent:
 
     def _build_messages(self, task: Task) -> list[Message]:
         messages: list[Message] = []
+        # Inject project memory as first system message.
+        if self._memory is not None:
+            mem_prompt = self._memory.to_system_prompt()
+            if mem_prompt:
+                messages.append(Message(role="system", content=mem_prompt))
         if task.system_prompt:
             messages.append(Message(role="system", content=task.system_prompt))
         messages.append(Message(role="user", content=task.prompt))
         return messages
+
+    async def _stream_with_retry(
+        self, messages: list[Message], model: str
+    ) -> tuple[str, CostEntry]:
+        """Stream from provider with retry on transient errors."""
+
+        async def _do_stream() -> tuple[str, CostEntry]:
+            chunks: list[str] = []
+            tracker = CostTracker(get_model_pricing(self._settings.provider, model))
+            try:
+                async for event in self._provider.stream(messages):
+                    match event:
+                        case ContentDelta(text=text):
+                            chunks.append(text)
+                        case UsageEvent(usage=usage):
+                            tracker.record_usage(usage)
+            except KeyboardInterrupt:
+                logger.info("Stream interrupted by user")
+                if chunks:
+                    chunks.append("\n\n[interrupted]")
+            return "".join(chunks), tracker.finalize(model)
+
+        return await retry(_do_stream)
 
     def _make_cache_hit_entry(self, model: str) -> CostEntry:
         return CostEntry(
