@@ -2,12 +2,11 @@
 
 ## Project Identity
 
-- **Mission**: Build the most cost-effective AI agent harness — **use any model, pay less every time**. Competing with Claude Code, GitHub Copilot, Cursor, OpenHands, and similar tools.
-- **Status**: Phase 0 ✅ complete. Package installs, CLI prints version, CI passes. Entering Phase 1 (agent loop + cost fingerprint).
-- **Design lineage**: Architecture informed by deep research of Claude Code (+ Agent SDK), Cursor, GitHub Copilot (HyDRA), OpenHands, LangChain/LangGraph/Deep Agents, CrewAI, Reasonix, and mid-2026 LLM pricing/caching landscape.
-- **Core principle**: Any model, getting cheaper over time. Every infrastructure layer works to reduce the token footprint of each call. Cost savings come from caching, compression, preprocessing, and budget enforcement — the harness self-tunes as usage grows, making the same model cost less session after session.
-- **Name metaphor**: Like a sponge — absorb maximum context efficiently so the model has everything it needs and nothing it doesn't. Squeeze out maximum value per token.
-- **Key differentiator**: First harness where **cost optimization is the infrastructure, not the routing decision**. Sponge is not a cheaper-model router. It is a cost-learning harness: every run leaves behind a reusable cost fingerprint, so future runs spend fewer paid tokens for the same model-quality outcome.
+- **Mission**: Reduce LLM cost to **1/10 of the original** through agent engineering architecture alone — same model, same task quality, one-tenth the tokens.
+- **Status**: Phase 0-2 complete. Agent loop, cost fingerprint, self-tuning closed loop, 3 providers, plugin routing, context compression, 61 tests. 48 source files.
+- **Core principle**: The agent architecture itself is the cost-reduction engine. Not bolt-on cache layers. Not model downgrading. Every design decision — how tasks are decomposed, how context is loaded, how sub-agents return results, how memory is structured — exists to slash token consumption. The target is 1/10.
+- **Name metaphor**: Like a sponge — absorb maximum context, squeeze out maximum value. Every token sent to the model must justify its existence.
+- **Key differentiator**: Not features — architecture. Competitors add caching and compression as afterthoughts. Sponge designs the agent loop from first principles around token minimization. Task decomposition, progressive context loading, sub-agent condensation, and memory-based reuse are not features on a roadmap — they are the roadmap. Everything else is secondary.
 
 ## Current Agent Instructions
 
@@ -36,27 +35,28 @@ Local development environment:
 
 Use `uv` with Python 3.12 for local development. The system `python3` is 3.9 and is not suitable for this project.
 
-## Core Innovation
+## Core Innovation — Architecture as Cost Reduction
 
-The innovation is not merely "automatically tune some parameters." It is a cost-learning loop:
+The target: **same model, same task quality, 1/10 the tokens.** This is not achieved by adding caching and compression as afterthoughts. It is achieved by designing the agent architecture from first principles around token minimization:
 
-1. **Cost Fingerprint** — every run records why it cost money: task type, context size, tool calls, cache hits/misses, repo state, model, compression layer, provider capabilities, and usage.
-2. **Savings Ledger** — every response reports naive cost, actual cost, saved by cache, saved by compression, saved by plugin routing, and later saved by sub-agent condensation/preprocessing.
-3. **Replay-Based Optimizer** — historical fingerprints are replayed offline under candidate configurations before any live A/B or shadow testing.
-4. **Live Feedback Loop** — only replay-approved changes enter live validation; winning low-risk changes can be applied, high-risk changes require review.
+1. **Task Decomposition** — complex tasks are broken into small, focused sub-tasks. Each sub-task carries only the context it needs, not the entire conversation history. A 10-step refactor doesn't send all 10 steps' context to every call.
 
-This makes "越用越省钱" measurable and auditable instead of a slogan.
+2. **Progressive Context Loading** — context is loaded incrementally, not dumped upfront. The model sees only what's relevant to the current step. Repository structure, file contents, and tool outputs are fetched on demand, not pre-loaded.
+
+3. **Sub-Agent Condensation** — exploration (code search, file reading, test running) happens in isolated sub-agents. The main model receives condensed results with source references, not raw transcripts. A 50,000-token exploration becomes a 500-token summary.
+
+4. **Memory-Based Reuse** — the agent remembers decisions, patterns, and project conventions across sessions. It doesn't re-derive the same conclusions. Project-level memory eliminates repeated context.
+
+5. **Cost Fingerprint + Replay** — every call records why it cost money. Historical fingerprints are replayed to measure the impact of architectural changes on real workloads. The self-tuning loop closes the gap between "should save tokens" and "does save tokens."
+
+6. **Plugin Routing** — tasks that don't need LLM reasoning (file ops, shell commands, search) bypass the model entirely. $0 cost, 0 tokens.
+
+The savings ledger tracks each mechanism independently, so the 1/10 claim is auditable per workload.
 
 ## Coding Capability Status
 
-Sponge is intended to become a coding-capable agent harness, but it cannot write code yet.
-
-- Phase 0 ✅: `sponge --version` works. Installable, testable, lintable.
-- After Phase 1: can answer coding questions with one cost-tracked model call, cache, and fingerprint recording.
-- After Phase 2: can replay historical fingerprints to recommend cost-saving config changes (the moat).
-- After Phase 3+: commodity features (file editing, context compression, sub-agents) added one at a time.
-
-Until Phase 1 exists, do not describe Sponge as a working agent harness.
+- Phase 0-2 complete: single/multi-turn conversations, cost tracking, self-tuning, context compression, plugin routing, 3 LLM providers.
+- Phase 3+: task decomposition, sub-agent condensation, progressive context loading, memory-based reuse — the architectural layers that drive toward 1/10.
 
 ## What is an Agent Harness
 

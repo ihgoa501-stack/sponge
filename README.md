@@ -1,23 +1,25 @@
-# Sponge 🧽 — Cost-Learning AI Agent Harness
+# Sponge 🧽 — 1/10 LLM Cost Through Agent Architecture
 
-**Use your chosen model. Spend fewer paid tokens on repeated project work.**
+**Same model. Same task quality. One-tenth the tokens.**
 
-Sponge is an AI agent **harness** (not a framework, not a runtime) that learns how a project spends tokens, then reuses, compresses, caches, and preprocesses context so the configured final reasoning model receives fewer paid tokens over time.
+Sponge is an AI agent harness that reduces LLM cost to 1/10 through architecture alone — not by switching to cheaper models, not by bolt-on caching. Every design decision in the agent loop exists to minimize token consumption: task decomposition, progressive context loading, sub-agent condensation, memory-based reuse, and plugin routing.
 
-Sponge is not a cheaper-model router. The final reasoning model stays stable unless the user explicitly changes it. Helper executors may be local or cheaper when they only prepare, retrieve, compress, or validate context.
-
-> The name: like a sponge — absorb maximum context efficiently, squeeze out maximum value per token.
+> The name: like a sponge — absorb maximum context, squeeze out maximum value. Every token must justify its existence.
 
 ---
 
-## Why Sponge?
+## How It Works
 
-Many agent tools treat cost as a routing decision or a manual setting. Sponge treats cost as an accounting and infrastructure problem:
+| Layer | Mechanism | Token Reduction |
+|-------|-----------|-----------------|
+| **Task Decomposition** | Break complex tasks into focused sub-tasks | 5-10× per subtask |
+| **Progressive Context** | Load context on demand, not upfront | 3-5× |
+| **Sub-Agent Condensation** | 50K-token exploration → 500-token summary | 10-100× |
+| **Memory Reuse** | Remember decisions, don't re-derive | 2-5× |
+| **Plugin Routing** | File ops, shell → $0 LLM cost | ∞ |
+| **Self-Tuning** | Detect waste, shadow A/B validate | 5-20% per iteration |
 
-| Problem | Typical approach | Sponge's approach |
-|---------|-----------------|-------------------|
-| **Cost** | Route simpler tasks to cheaper models → quality may change | Reduce paid tokens before the chosen final model is called |
-| **Caching** | Stateless; every call is paid in full | Exact, semantic, and prompt-cache strategies with state guards |
+Compound target: **1/10 cost.**
 | **Context** | Send full history every turn | 5-layer compression pipeline: mask → prune → summarize → slide |
 | **Tuning** | Hardcoded thresholds; user tweaks settings manually | Replay and live feedback loops propose measured configuration changes |
 | **Transparency** | No cost breakdown per call/task | Savings ledger shows actual cost, naive baseline, and savings source |

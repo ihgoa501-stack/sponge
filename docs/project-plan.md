@@ -16,35 +16,24 @@ My task is to turn Sponge from a strong idea into an executable project plan:
 
 ## Product Thesis
 
-Sponge is a cost-learning agent harness. It does not primarily save money by routing the final answer to a cheaper model. It saves money by learning how each project spends tokens, then reusing, compressing, caching, and pre-processing context so the same chosen main model receives fewer paid tokens over time.
+Sponge reduces LLM cost to **1/10** through agent architecture alone. Same model, same task quality, one-tenth the tokens.
+
+This is not achieved by bolt-on cache layers or model routing. It is achieved by fundamental architectural decisions: task decomposition, progressive context loading, sub-agent condensation, memory-based reuse, and plugin routing. Every token sent to the model must justify its existence.
 
 Positioning statement:
 
-> Sponge is not a cheaper-model router. It is a cost-learning harness: every run leaves behind a reusable cost fingerprint, so future runs spend fewer paid tokens for the same model-quality outcome.
+> Sponge is not a cheaper-model router. It is an architecture-level cost compressor: the agent loop is designed from first principles to minimize token consumption, targeting 1/10 the cost of a naive harness for the same task quality.
 
-The strict wording is:
+## Core Innovation — Architecture as Cost Reduction
 
-> Sponge keeps the final reasoning model stable unless the user explicitly changes it. Helper executors may be cheaper or local, but they only prepare, retrieve, compress, or validate context. They do not silently replace the configured main model for final reasoning.
+The target is **1/10 tokens for the same task quality.** Each architectural layer independently reduces token consumption:
 
-This resolves the design tension between "never downgrade" and using local preprocessors or cheaper sub-agents.
-
-## Core Innovation
-
-The current docs already contain the right ingredients: cost tracking, caches, compression, plugin routing, telemetry, and self-tuning. The innovation should be framed as a closed-loop system:
-
-1. **Cost Fingerprint**
-   Each run records why it cost money: task class, model, repo state, context size, compression choices, cache state, tool calls, provider capabilities, and final usage.
-
-2. **Savings Ledger**
-   Each run reports actual cost against a naive baseline, split by savings source: exact cache, semantic cache, prompt cache, compression, plugins, sub-agent condensation, and preprocessing.
-
-3. **Replay-Based Optimizer**
-   Before live A/B tests, Sponge replays historical cost fingerprints through candidate configurations. Only changes that reduce simulated cost without violating safety constraints enter live shadow testing.
-
-4. **Live Feedback Loop**
-   Shadow sessions validate promising changes with real usage. Tuning applies only when savings beat testing cost and do not increase known risk signals.
-
-This is stronger than "auto-tune thresholds" because it creates an audit trail and a repeatable optimization lab.
+1. **Task Decomposition** — break complex work into focused sub-tasks, each with minimal context.
+2. **Progressive Context Loading** — load context on demand, not upfront.
+3. **Sub-Agent Condensation** — exploration returns condensed evidence, not raw transcripts.
+4. **Memory-Based Reuse** — remember decisions across sessions; don't re-derive.
+5. **Cost Fingerprint + Replay** — measure every architectural change against real workload data.
+6. **Plugin Routing** — tasks not needing LLM reasoning bypass the model entirely ($0).
 
 ## Critical Self-Assessment (2026-05-24)
 
@@ -97,14 +86,18 @@ These corrections should guide all future docs and implementation plans:
 
 ## Phase Strategy
 
-Three phases to prove the core hypothesis. After Phase 2, Sponge has its moat. Everything else is additive.
+Each phase adds an architectural layer that independently reduces token consumption toward the 1/10 target.
 
-| Phase | Name | Primary Proof | Why First |
-|-------|------|---------------|-----------|
-| 0 | Development Foundation | Package installs, CLI starts, tests run | ✅ Done |
-| 1 | Agent Loop + Cost Fingerprint | Streamed LLM call + exact cache + savings ledger + fingerprint recording | The accounting spine. Every call from day one produces data that feeds the optimizer. |
-| 2 | Replay Optimizer MVP | Historical fingerprints replayed under candidate configs → tuning proposals with cost delta + risk | The moat. No other harness does this. If this doesn't work, nothing else matters. |
-| 3+ | Commodity Features | Context compression, plugin routing, approval gates, sub-agents, multimodal | Added one at a time, each measured by whether it improves the replay optimizer's savings proposals. |
+| Phase | Layer | What It Saves |
+|-------|-------|---------------|
+| 0 | Foundation | ✅ Done |
+| 1 | Cost Accounting | Fingerprints + ledger — measure every token |
+| 2 | Self-Tuning | Auto-detect waste, shadow A/B validate fixes |
+| 3 | Task Decomposition | Break complex tasks → small focused sub-tasks |
+| 4 | Sub-Agent Condensation | 50K-token exploration → 500-token summary |
+| 5 | Progressive Context | Load context on demand, not upfront |
+| 6 | Memory Reuse | Remember decisions, don't re-derive |
+| 7 | 1/10 Benchmark | Prove the target against naive baselines |
 
 ## Phase Acceptance Criteria
 
