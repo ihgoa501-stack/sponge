@@ -1,0 +1,84 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "sponge-ai"
+version = "0.1.0-dev"
+description = "Cost-optimal AI agent harness — use the best model, pay the least"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12"
+authors = [
+    { name = "Sponge Contributors" },
+]
+keywords = ["ai", "agent", "llm", "cost-optimization", "harness"]
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "typer>=0.12",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "httpx>=0.27",
+    "tiktoken>=0.7",
+    "tomli>=2.0 ; python_version < '3.11'",
+    "rich>=13.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=5.0",
+    "ruff>=0.4",
+    "mypy>=1.8",
+    "pre-commit>=3.6",
+]
+anthropic = [
+    "anthropic>=0.39",
+]
+openai = [
+    "openai>=1.30",
+]
+deepseek = [
+    "openai>=1.30",  # DeepSeek uses OpenAI-compatible API
+]
+all = [
+    "sponge-ai[anthropic,openai,deepseek]",
+]
+
+[project.scripts]
+sponge = "sponge.cli.app:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["sponge*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "ANN", "B", "SIM", "ARG"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+ignore_missing_imports = true
+disallow_untyped_defs = true
+disallow_any_unimported = false
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
