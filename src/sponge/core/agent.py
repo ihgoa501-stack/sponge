@@ -7,7 +7,10 @@ from datetime import UTC, datetime
 
 from sponge.cache.result_cache import ResultCache
 from sponge.config.settings import Settings
+from sponge.core.condenser import CondensedResult, SubAgentCondenser
 from sponge.core.context import ContextCompressor
+from sponge.core.context_planner import ContextPlanner
+from sponge.core.decomposer import TaskDecomposer
 from sponge.core.session import Session, Turn
 from sponge.core.task import Task, TaskResult
 from sponge.cost.models import CostEntry, Usage
@@ -35,12 +38,18 @@ class Agent:
         cache: ResultCache,
         collector: TelemetryCollector,
         plugins: PluginRegistry | None = None,
+        decomposer: TaskDecomposer | None = None,
+        condenser: SubAgentCondenser | None = None,
+        context_planner: ContextPlanner | None = None,
     ) -> None:
         self._provider = provider
         self._settings = settings
         self._cache = cache
         self._collector = collector
         self._plugins = plugins
+        self._decomposer = decomposer
+        self._condenser = condenser
+        self._context_planner = context_planner
 
     async def run(
         self,
@@ -151,6 +160,109 @@ class Agent:
         return TaskResult(
             task=task,
             response=response,
+            cost_entry=cost_entry,
+            fingerprint=fp,
+            cache_hit=False,
+        )
+
+    async def run_decomposed(self, task: Task) -> TaskResult:
+        """Execute a task with architecture-level token reduction.
+
+        Flow:
+        1. Decompose complex task → sub-tasks (if applicable)
+        2. Plan context per sub-task → load only what's needed
+        3. Execute each sub-task
+        4. Condense results → structured summary
+        5. Record fingerprints per step
+
+        If no decomposer is configured, falls back to regular run().
+        """
+        if self._decomposer is None:
+            return await self.run(task)
+
+        model = task.model or self._settings.model
+
+        # 1. Decompose.
+        decompose_result = await self._decomposer.decompose(task.prompt)
+
+        if not decompose_result.was_decomposed or len(decompose_result.sub_tasks) <= 1:
+            return await self.run(task)
+
+        # 2-3. Execute each sub-task with context planning.
+        results: list[str] = []
+        total_cost = 0.0
+        total_naive = 0.0
+        total_in = 0
+        total_out = 0
+
+        for st in decompose_result.sub_tasks:
+            # Plan context.
+            ctx_items: list[str] = []
+            if self._context_planner is not None:
+                plan = self._context_planner.plan(st.id, st.description, st.context_hint)
+                ctx_items = [item.path for item in plan.needed]
+
+            # Execute sub-task (cheap LLM call with minimal context).
+            sub_prompt = st.description
+            if ctx_items:
+                sub_prompt = f"Context files: {', '.join(ctx_items[:5])}\n\n{st.description}"
+
+            sub_result = await self.run(Task(prompt=sub_prompt, model=model))
+            results.append(sub_result.response)
+            total_cost += sub_result.cost_entry.cost
+            total_naive += sub_result.cost_entry.naive_cost
+            total_in += sub_result.cost_entry.usage.tokens_in
+            total_out += sub_result.cost_entry.usage.tokens_out
+
+            # Mark context as loaded.
+            if self._context_planner is not None:
+                self._context_planner.mark_loaded(ctx_items)
+
+        # 4. Condense results.
+        raw_output = "\n\n".join(
+            f"Sub-task {st.id}: {r}"
+            for st, r in zip(decompose_result.sub_tasks, results, strict=False)
+        )
+
+        condensed: CondensedResult | None = None
+        if self._condenser is not None:
+            condensed = await self._condenser.condense(raw_output)
+
+        session_id = uuid.uuid4().hex[:12]
+        task_hash = hashlib.sha256(task.prompt.encode()).hexdigest()[:16]
+
+        if condensed and condensed.findings:
+            final_response = f"{condensed.summary}\n\n{condensed.key_insight}"
+        else:
+            final_response = "\n\n".join(results)
+
+        cost_entry = CostEntry(
+            usage=Usage(
+                tokens_in=total_in,
+                tokens_out=total_out,
+            ),
+            model=model,
+            cost=round(total_cost, 6),
+            naive_cost=round(total_naive, 6),
+        )
+        fp = self._make_fingerprint(
+            session_id=session_id,
+            task_hash=task_hash,
+            model=model,
+            cost_entry=cost_entry,
+            cache_hit=False,
+        )
+        self._collector.log_call(fp)
+
+        logger.info(
+            "Decomposed: %d sub-tasks, cost=$%.4f naive=$%.4f",
+            len(decompose_result.sub_tasks),
+            total_cost,
+            total_naive,
+        )
+        return TaskResult(
+            task=task,
+            response=final_response,
             cost_entry=cost_entry,
             fingerprint=fp,
             cache_hit=False,
