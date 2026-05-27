@@ -1,8 +1,13 @@
 # Sponge 🧽
 
-**Same model. Same quality. Fraction of the tokens.**
+[![PyPI version](https://img.shields.io/pypi/v/sponge-ai)](https://pypi.org/project/sponge-ai/)
+[![CI](https://github.com/ihgoa501-stack/sponge/actions/workflows/ci.yml/badge.svg)](https://github.com/ihgoa501-stack/sponge/actions)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-Sponge wraps your LLM calls with architecture-level cost compression — not by switching to cheaper models, not by bolt-on caching. Every layer of the agent loop is designed to minimize token consumption.
+**Same model. Same quality. 1/10 the tokens.**
+
+Sponge is an **architecture-level cost compression harness** for LLM agents. It doesn't switch you to cheaper models or bolt on caching as an afterthought. Every layer — task decomposition, context loading, sub-agent results, memory — is designed from first principles to slash token consumption. Same model quality, dramatically lower cost.
 
 ---
 
@@ -117,10 +122,10 @@ sponge cost stats
 ## Development
 
 ```bash
-git clone https://github.com/your/sponge.git
+git clone https://github.com/ihgoa501-stack/sponge.git
 cd sponge
 pip install -e ".[dev]"
-pytest                  # 106 tests, zero API calls required
+pytest                  # 157 tests, zero API calls required
 ruff check src/         # lint
 mypy src/sponge/        # type check
 ```
