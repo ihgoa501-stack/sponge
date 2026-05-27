@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Sponge npm wrapper — delegates to the Python sponge CLI.
+set -e
+
+if command -v sponge &>/dev/null; then
+    exec sponge "$@"
+fi
+
+echo "sponge not found — installing via pip …" >&2
+pip install sponge-ai 2>/dev/null || pip3 install sponge-ai 2>/dev/null || {
+    echo "❌ Failed to install. Make sure Python 3.12+ and pip are installed." >&2
+    exit 1
+}
+
+exec sponge "$@"

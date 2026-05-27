@@ -1,0 +1,20 @@
+{
+  "name": "sponge-ai",
+  "version": "0.1.2",
+  "description": "Cost-optimal AI agent harness — use the best model, pay the least",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ihgoa501-stack/sponge.git"
+  },
+  "keywords": ["ai", "agent", "llm", "cost", "claude", "coding"],
+  "bin": {
+    "sponge": "./bin/sponge"
+  },
+  "scripts": {
+    "postinstall": "pip install sponge-ai 2>/dev/null || pip3 install sponge-ai 2>/dev/null || echo '⚠️  pip not found — sponge requires Python 3.12+ and pip'"
+  },
+  "files": [
+    "bin/sponge"
+  ]
+}
