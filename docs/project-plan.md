@@ -35,6 +35,8 @@ The target is **1/10 tokens for the same task quality.** Each architectural laye
 5. **Cost Fingerprint + Replay** — measure every architectural change against real workload data.
 6. **Plugin Routing** — tasks not needing LLM reasoning bypass the model entirely ($0).
 
+7. **Reflexion** — every failure triggers structured self-evaluation. Lessons are extracted and stored in reflective memory, then retrieved when similar tasks appear. The same mistake is never paid for twice. This is the meta-layer: it doesn't save tokens on THIS call — it prevents wasted tokens on ALL FUTURE calls. **越用越省钱** (cheaper over time) through accumulated wisdom, not just caching.
+
 ## Critical Self-Assessment (2026-05-24)
 
 The original 12-phase waterfall had fundamental flaws identified during review:
@@ -97,7 +99,8 @@ Each phase adds an architectural layer that independently reduces token consumpt
 | 4 | Sub-Agent Condensation | 50K-token exploration → 500-token summary |
 | 5 | Progressive Context | Load context on demand, not upfront |
 | 6 | Memory Reuse | Remember decisions, don't re-derive |
-| 7 | 1/10 Benchmark | Prove the target against naive baselines |
+| 7 | **Reflexion** | Learn from every failure — structured self-evaluation, lesson extraction, reflective memory retrieval |
+| 8 | 1/10 Benchmark | Prove the target against naive baselines |
 
 ## Phase Acceptance Criteria
 
@@ -105,9 +108,9 @@ Each phase adds an architectural layer that independently reduces token consumpt
 
 Done. `sponge --version` works. pytest/ruff/mypy pass. CI is configured.
 
-### Phase 1: Agent Loop + Cost Fingerprint
+### Phase 1: Agent Loop + Cost Fingerprint ✅
 
-Done when:
+Done. All acceptance criteria met:
 
 - `sponge run "say hello"` streams output from one configured provider.
 - Actual usage is recorded from provider response events.
@@ -126,9 +129,9 @@ Worker agents:
 - Telemetry agent: cost fingerprint schema and SQLite persistence.
 - CLI agent: `run` command, streaming renderer, cost report, JSON mode.
 
-### Phase 2: Replay Optimizer MVP
+### Phase 2: Replay Optimizer MVP ✅
 
-Done when:
+Done. All acceptance criteria met:
 
 - `sponge tune --report` reads historical fingerprints from SQLite.
 - The replay engine simulates candidate parameter values over stored fingerprints **without calling real LLM APIs**.
@@ -144,25 +147,54 @@ Worker agents:
 - Optimizer agent: replay engine, pattern analyzer (SQL queries), proposal model.
 - CLI agent: `sponge tune --report` and `sponge tune --apply`.
 
-### Phase 3+: Commodity Features
+### Phase 7: Reflexion — Structured Self-Evaluation + Lesson Memory
 
-Each feature is added only when:
+> 照镜子 → 刻字 → 读柱子 — *mirror → carve → read*
 
-1. A concrete use case shows it would improve replay optimizer proposals.
-2. It can be measured against the benchmark fixtures from Phase 1.
+The agent learns from every failure through structured verbal self-critique. Each failed attempt triggers a reflection call that analyzes the trajectory, extracts a compact lesson, and stores it in reflective memory. Before future tasks, relevant lessons are retrieved and injected as decision-guiding context.
 
-Candidate features, in no fixed order:
+**Acceptance Criteria:**
+- [ ] On task failure (tool error, user correction, quality flag), a reflection call generates structured self-evaluation.
+- [ ] The reflection prompt is Socratic: asks diagnostic questions, does not provide answers.
+- [ ] Lessons are extracted in a structured format: condition → action → observed_outcome → lesson.
+- [ ] Reflective memory supports query-by-condition retrieval (task type, tool set, failure mode).
+- [ ] Before each task, relevant lessons are retrieved and injected into the system prompt.
+- [ ] The cost fingerprint records: reflection tokens spent, lessons retrieved, lesson impact flag.
+- [ ] Replay optimizer measures whether lessons actually reduce tokens on replay of historical trajectories.
+- [ ] At least 5 fixture scenarios demonstrate: failure → reflection → lesson → successful retry.
+- [ ] Lessons are stored in `.sponge/reflections/` as structured JSONL, keyed by condition hash.
 
-- Context compression (5-layer pipeline)
-- Plugin routing + approval gates (file ops, shell, search)
-- Sub-agent condensation (codebase exploration)
-- Semantic cache with state guards
-- Multimodal input (images, PDFs)
-- MCP server integration
-- Session resume and multi-turn persistence
-- Provider expansion (OpenAI, DeepSeek)
+**Worker agents:**
+- Reflection agent: Socratic evaluation prompt, trajectory analysis, lesson extraction.
+- Memory agent: reflective memory store with condition-keyed retrieval (extend `src/sponge/memory/`).
+- Integration agent: wire reflection into agent loop (`src/sponge/core/agent.py`).
+- CLI agent: `sponge reflections [list|show|apply|prune]`.
 
-No separate phase plan exists for these. Each is a standalone mini-project with its own plan file when prioritized.
+### Phase 8: 1/10 Benchmark
+
+Prove the cost reduction target against naive baselines, including Reflexion savings measurement.
+
+### Phase 3+: Commodity Features (✅ complete)
+
+All commodity features are implemented (157 tests, 66 source files):
+
+| Feature | Status |
+|---------|--------|
+| Context compression (5-layer pipeline) | ✅ |
+| Plugin routing + approval gates (file ops, shell, search) | ✅ |
+| Sub-agent condensation (codebase exploration) | ✅ |
+| Task decomposition | ✅ |
+| Progressive context loading | ✅ |
+| Semantic cache with state guards | ✅ |
+| MCP server integration | ✅ |
+| Session resume and multi-turn persistence | ✅ |
+| Provider expansion (Anthropic, OpenAI, DeepSeek, OpenRouter) | ✅ |
+| Desktop server | ✅ |
+| Shell sandbox | ✅ |
+| Long-term project memory | ✅ |
+| Multimodal input (images, PDFs) | ⏳ |
+| 1/10 benchmark proof | ⏳ |
+| PyPI publication | ⏳ |
 
 ## Agent Handoff Protocol
 
@@ -184,10 +216,13 @@ Planner review after each task should check:
 - Does it update docs if user-visible behavior changed?
 - Does it avoid stale cache or unsafe tool execution paths?
 
-## Immediate Next Planning Work
+## Remaining Work
 
-1. `docs/superpowers/plans/2026-05-24-phase-1-cost-fingerprint.md` — detailed implementation plan for Phase 1.
-2. `docs/superpowers/plans/2026-05-24-phase-2-replay-optimizer.md` — after Phase 1 is complete.
-3. Keep [claims.md](claims.md) and [pricing-policy.md](pricing-policy.md) current.
+Remaining implementation:
 
-Do not create plans for Phase 3+ features until Phase 2 proves the fingerprint→replay→tune loop works.
+1. **Phase 7: Reflexion** — structured self-evaluation, lesson extraction, reflective memory, pre-task retrieval. The meta-layer that makes every other layer smarter over time.
+2. **Multimodal input** — image and PDF attachment support in the agent loop.
+3. **Phase 8: 1/10 benchmark** — prove cost reduction target against naive baselines, including Reflexion savings measurement.
+4. **PyPI publication** — make `pip install sponge-ai` work.
+
+Keep [claims.md](claims.md) and [pricing-policy.md](pricing-policy.md) current.

@@ -1,4 +1,4 @@
 # Sponge — Cost-Optimal AI Agent Harness
 # Use the best model, pay the least.
 
-__version__ = "0.1.4"
+__version__ = "0.2.0"

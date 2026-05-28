@@ -20,6 +20,13 @@ class CostFingerprint:
     timestamp: str  # ISO-8601
     experiment_id: str | None = None
     experiment_group: str | None = None  # "baseline" | "shadow"
+    # Reflection fields (Phase 7).
+    reflection_tokens: int = 0
+    """Tokens spent on the reflection call (0 if no reflection)."""
+    lessons_retrieved: int = 0
+    """Number of lessons retrieved from reflective memory before the call."""
+    lesson_stored: str = ""
+    """ID of the lesson stored after this call, if any."""
 
 
 @dataclass

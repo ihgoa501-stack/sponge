@@ -1,0 +1,514 @@
+$ /Users/lc/Library/Python/3.9/bin/uv build 2>&1
+[exit 0]
+Building source distribution...
+/Users/lc/.cache/uv/builds-v0/.tmpP9EB59/lib/python3.12/site-packages/setuptools/config/_apply_pyprojecttoml.py:82: SetuptoolsDeprecationWarning: `project.license` as a TOML table is deprecated
+!!
+
+        ********************************************************************************
+        Please use a simple string containing a SPDX expression for `project.license`. You can also use `project.license-files`. (Both options available on setuptools>=77.0.0).
+
+        By 2027-Feb-18, you need to update your project and remove deprecated calls
+        or your builds will no longer be supported.
+
+        See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+        ********************************************************************************
+
+!!
+  corresp(dist, value, root_dir)
+/Users/lc/.cache/uv/builds-v0/.tmpP9EB59/lib/python3.12/site-packages/setuptools/config/_apply_pyprojecttoml.py:61: SetuptoolsDeprecationWarning: License classifiers are deprecated.
+!!
+
+        ********************************************************************************
+        Please consider removing the following classifiers in favor of a SPDX license expression:
+
+        License :: OSI Approved :: MIT License
+
+        See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+        ********************************************************************************
+
+!!
+  dist._finalize_license_expression()
+/Users/lc/.cache/uv/builds-v0/.tmpP9EB59/lib/python3.12/site-packages/setuptools/dist.py:765: SetuptoolsDeprecationWarning: License classifiers are deprecated.
+!!
+
+        ********************************************************************************
+        Please consider removing the following classifiers in favor of a SPDX license expression:
+
+        License :: OSI Approved :: MIT License
+
+        See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+        ********************************************************************************
+
+!!
+  self._finalize_license_expression()
+running egg_info
+writing src/sponge_ai.egg-info/PKG-INFO
+writing dependency_links to src/sponge_ai.egg-info/dependency_links.txt
+writing entry points to src/sponge_ai.egg-info/entry_points.txt
+writing requirements to src/sponge_ai.egg-info/requires.txt
+writing top-level names to src/sponge_ai.egg-info/top_level.txt
+reading manifest file 'src/sponge_ai.egg-info/SOURCES.txt'
+adding license file 'LICENSE'
+writing manifest file 'src/sponge_ai.egg-info/SOURCES.txt'
+/Users/lc/.cache/uv/builds-v0/.tmpP9EB59/lib/python3.12/site-packages/setuptools/config/_apply_pyprojecttoml.py:82: SetuptoolsDeprecationWarning: `project.license` as a TOML table is deprecated
+!!
+
+        ********************************************************************************
+        Please use a simple string containing a SPDX expression for `project.license`. You can also use `project.license-files`. (Both options available on setuptools>=77.0.0).
+
+        By 2027-Feb-18, you need to update your project and remove deprecated calls
+        or your builds will no longer be supported.
+
+        See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+        ********************************************************************************
+
+!!
+  corresp(dist, value, root_dir)
+/Users/lc/.cache/uv/builds-v0/.tmpP9EB59/lib/python3.12/site-packages/setuptools/config/_apply_pyprojecttoml.py:61: SetuptoolsDeprecationWarning: License classifiers are deprecated.
+!!
+
+        ********************************************************************************
+        Please consider removing the following classifiers in favor of a SPDX license expression:
+
+        License :: OSI Approved :: MIT License
+
+        See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+        ********************************************************************************
+
+!!
+  dist._finalize_license_expression()
+/Users/lc/.cache/uv/builds-v0/.tmpP9EB59/lib/python3.12/site-packages/setuptools/dist.py:765: SetuptoolsDeprecationWarning: License classifiers are deprecated.
+!!
+
+        ********************************************************************************
+        Please consider removing the following classifiers in favor of a SPDX license expression:
+
+        License :: OSI Approved :: MIT License
+
+        See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+        ********************************************************************************
+
+!!
+  self._finalize_license_expression()
+running sdist
+running egg_info
+writing src/sponge_ai.egg-info/PKG-INFO
+writing dependency_links to src/sponge_ai.egg-info/dependency_links.txt
+writing entry points to src/sponge_ai.egg-info/entry_points.txt
+writing requirements to src/sponge_ai.egg-info/requires.txt
+writing top-level names to src/sponge_ai.egg-info/top_level.txt
+reading manifest file 'src/sponge_ai.egg-info/SOURCES.txt'
+adding license file 'LICENSE'
+writing manifest file 'src/sponge_ai.egg-info/SOURCES.txt'
+running check
+creating sponge_ai-0.2.0
+creating sponge_ai-0.2.0/src/sponge
+creating sponge_ai-0.2.0/src/sponge/approval
+creating sponge_ai-0.2.0/src/sponge/cache
+creating sponge_ai-0.2.0/src/sponge/cli
+creating sponge_ai-0.2.0/src/sponge/config
+creating sponge_ai-0.2.0/src/sponge/core
+creating sponge_ai-0.2.0/src/sponge/cost
+creating sponge_ai-0.2.0/src/sponge/desktop
+creating sponge_ai-0.2.0/src/sponge/desktop/static
+creating sponge_ai-0.2.0/src/sponge/llm
+creating sponge_ai-0.2.0/src/sponge/memory
+creating sponge_ai-0.2.0/src/sponge/plugins
+creating sponge_ai-0.2.0/src/sponge/plugins/builtins
+creating sponge_ai-0.2.0/src/sponge/sandbox
+creating sponge_ai-0.2.0/src/sponge/telemetry
+creating sponge_ai-0.2.0/src/sponge/utils
+creating sponge_ai-0.2.0/src/sponge_ai.egg-info
+creating sponge_ai-0.2.0/tests
+copying files to sponge_ai-0.2.0...
+copying LICENSE -> sponge_ai-0.2.0
+copying README.md -> sponge_ai-0.2.0
+copying pyproject.toml -> sponge_ai-0.2.0
+copying src/sponge/__init__.py -> sponge_ai-0.2.0/src/sponge
+copying src/sponge/__main__.py -> sponge_ai-0.2.0/src/sponge
+copying src/sponge/approval/__init__.py -> sponge_ai-0.2.0/src/sponge/approval
+copying src/sponge/cache/__init__.py -> sponge_ai-0.2.0/src/sponge/cache
+copying src/sponge/cache/disk_store.py -> sponge_ai-0.2.0/src/sponge/cache
+copying src/sponge/cache/repo_state.py -> sponge_ai-0.2.0/src/sponge/cache
+copying src/sponge/cache/result_cache.py -> sponge_ai-0.2.0/src/sponge/cache
+copying src/sponge/cache/semantic_cache.py -> sponge_ai-0.2.0/src/sponge/cache
+copying src/sponge/cli/__init__.py -> sponge_ai-0.2.0/src/sponge/cli
+copying src/sponge/cli/app.py -> sponge_ai-0.2.0/src/sponge/cli
+copying src/sponge/cli/benchmark_cmd.py -> sponge_ai-0.2.0/src/sponge/cli
+copying src/sponge/cli/config_cmd.py -> sponge_ai-0.2.0/src/sponge/cli
+copying src/sponge/cli/cost_cmd.py -> sponge_ai-0.2.0/src/sponge/cli
+copying src/sponge/cli/desktop_cmd.py -> sponge_ai-0.2.0/src/sponge/cli
+copying src/sponge/cli/memory_cmd.py -> sponge_ai-0.2.0/src/sponge/cli
+copying src/sponge/cli/reflections_cmd.py -> sponge_ai-0.2.0/src/sponge/cli
+copying src/sponge/cli/run.py -> sponge_ai-0.2.0/src/sponge/cli
+copying src/sponge/cli/session_cmd.py -> sponge_ai-0.2.0/src/sponge/cli
+copying src/sponge/cli/tune_cmd.py -> sponge_ai-0.2.0/src/sponge/cli
+copying src/sponge/config/__init__.py -> sponge_ai-0.2.0/src/sponge/config
+copying src/sponge/config/settings.py -> sponge_ai-0.2.0/src/sponge/config
+copying src/sponge/core/__init__.py -> sponge_ai-0.2.0/src/sponge/core
+copying src/sponge/core/agent.py -> sponge_ai-0.2.0/src/sponge/core
+copying src/sponge/core/condenser.py -> sponge_ai-0.2.0/src/sponge/core
+copying src/sponge/core/context.py -> sponge_ai-0.2.0/src/sponge/core
+copying src/sponge/core/context_planner.py -> sponge_ai-0.2.0/src/sponge/core
+copying src/sponge/core/decomposer.py -> sponge_ai-0.2.0/src/sponge/core
+copying src/sponge/core/reflection.py -> sponge_ai-0.2.0/src/sponge/core
+copying src/sponge/core/session.py -> sponge_ai-0.2.0/src/sponge/core
+copying src/sponge/core/task.py -> sponge_ai-0.2.0/src/sponge/core
+copying src/sponge/cost/__init__.py -> sponge_ai-0.2.0/src/sponge/cost
+copying src/sponge/cost/ledger.py -> sponge_ai-0.2.0/src/sponge/cost
+copying src/sponge/cost/models.py -> sponge_ai-0.2.0/src/sponge/cost
+copying src/sponge/cost/pricing.py -> sponge_ai-0.2.0/src/sponge/cost
+copying src/sponge/cost/tracker.py -> sponge_ai-0.2.0/src/sponge/cost
+copying src/sponge/desktop/__init__.py -> sponge_ai-0.2.0/src/sponge/desktop
+copying src/sponge/desktop/server.py -> sponge_ai-0.2.0/src/sponge/desktop
+copying src/sponge/desktop/static/index.html -> sponge_ai-0.2.0/src/sponge/desktop/static
+copying src/sponge/llm/__init__.py -> sponge_ai-0.2.0/src/sponge/llm
+copying src/sponge/llm/anthropic_provider.py -> sponge_ai-0.2.0/src/sponge/llm
+copying src/sponge/llm/base.py -> sponge_ai-0.2.0/src/sponge/llm
+copying src/sponge/llm/deepseek_provider.py -> sponge_ai-0.2.0/src/sponge/llm
+copying src/sponge/llm/factory.py -> sponge_ai-0.2.0/src/sponge/llm
+copying src/sponge/llm/openai_provider.py -> sponge_ai-0.2.0/src/sponge/llm
+copying src/sponge/llm/openrouter_provider.py -> sponge_ai-0.2.0/src/sponge/llm
+copying src/sponge/llm/token_counter.py -> sponge_ai-0.2.0/src/sponge/llm
+copying src/sponge/memory/__init__.py -> sponge_ai-0.2.0/src/sponge/memory
+copying src/sponge/memory/reflective.py -> sponge_ai-0.2.0/src/sponge/memory
+copying src/sponge/memory/store.py -> sponge_ai-0.2.0/src/sponge/memory
+copying src/sponge/plugins/__init__.py -> sponge_ai-0.2.0/src/sponge/plugins
+copying src/sponge/plugins/base.py -> sponge_ai-0.2.0/src/sponge/plugins
+copying src/sponge/plugins/mcp_client.py -> sponge_ai-0.2.0/src/sponge/plugins
+copying src/sponge/plugins/mcp_plugin.py -> sponge_ai-0.2.0/src/sponge/plugins
+copying src/sponge/plugins/registry.py -> sponge_ai-0.2.0/src/sponge/plugins
+copying src/sponge/plugins/builtins/__init__.py -> sponge_ai-0.2.0/src/sponge/plugins/builtins
+copying src/sponge/plugins/builtins/file_ops.py -> sponge_ai-0.2.0/src/sponge/plugins/builtins
+copying src/sponge/plugins/builtins/search.py -> sponge_ai-0.2.0/src/sponge/plugins/builtins
+copying src/sponge/plugins/builtins/shell.py -> sponge_ai-0.2.0/src/sponge/plugins/builtins
+copying src/sponge/sandbox/__init__.py -> sponge_ai-0.2.0/src/sponge/sandbox
+copying src/sponge/sandbox/subprocess_sandbox.py -> sponge_ai-0.2.0/src/sponge/sandbox
+copying src/sponge/telemetry/__init__.py -> sponge_ai-0.2.0/src/sponge/telemetry
+copying src/sponge/telemetry/analyzer.py -> sponge_ai-0.2.0/src/sponge/telemetry
+copying src/sponge/telemetry/collector.py -> sponge_ai-0.2.0/src/sponge/telemetry
+copying src/sponge/telemetry/models.py -> sponge_ai-0.2.0/src/sponge/telemetry
+copying src/sponge/telemetry/tuner.py -> sponge_ai-0.2.0/src/sponge/telemetry
+copying src/sponge/utils/__init__.py -> sponge_ai-0.2.0/src/sponge/utils
+copying src/sponge/utils/errors.py -> sponge_ai-0.2.0/src/sponge/utils
+copying src/sponge/utils/logging.py -> sponge_ai-0.2.0/src/sponge/utils
+copying src/sponge/utils/retry.py -> sponge_ai-0.2.0/src/sponge/utils
+copying src/sponge_ai.egg-info/PKG-INFO -> sponge_ai-0.2.0/src/sponge_ai.egg-info
+copying src/sponge_ai.egg-info/SOURCES.txt -> sponge_ai-0.2.0/src/sponge_ai.egg-info
+copying src/sponge_ai.egg-info/dependency_links.txt -> sponge_ai-0.2.0/src/sponge_ai.egg-info
+copying src/sponge_ai.egg-info/entry_points.txt -> sponge_ai-0.2.0/src/sponge_ai.egg-info
+copying src/sponge_ai.egg-info/requires.txt -> sponge_ai-0.2.0/src/sponge_ai.egg-info
+copying src/sponge_ai.egg-info/top_level.txt -> sponge_ai-0.2.0/src/sponge_ai.egg-info
+copying tests/test_agent.py -> sponge_ai-0.2.0/tests
+copying tests/test_analyzer.py -> sponge_ai-0.2.0/tests
+copying tests/test_architecture.py -> sponge_ai-0.2.0/tests
+copying tests/test_benchmarks.py -> sponge_ai-0.2.0/tests
+copying tests/test_cache.py -> sponge_ai-0.2.0/tests
+copying tests/test_cli_run.py -> sponge_ai-0.2.0/tests
+copying tests/test_cli_tune.py -> sponge_ai-0.2.0/tests
+copying tests/test_cli_version.py -> sponge_ai-0.2.0/tests
+copying tests/test_context.py -> sponge_ai-0.2.0/tests
+copying tests/test_cost_tracker.py -> sponge_ai-0.2.0/tests
+copying tests/test_desktop.py -> sponge_ai-0.2.0/tests
+copying tests/test_llm_provider.py -> sponge_ai-0.2.0/tests
+copying tests/test_mcp.py -> sponge_ai-0.2.0/tests
+copying tests/test_memory.py -> sponge_ai-0.2.0/tests
+copying tests/test_plugins.py -> sponge_ai-0.2.0/tests
+copying tests/test_pricing.py -> sponge_ai-0.2.0/tests
+copying tests/test_reflection.py -> sponge_ai-0.2.0/tests
+copying tests/test_reflective_memory.py -> sponge_ai-0.2.0/tests
+copying tests/test_retry.py -> sponge_ai-0.2.0/tests
+copying tests/test_telemetry.py -> sponge_ai-0.2.0/tests
+copying tests/test_token_counter.py -> sponge_ai-0.2.0/tests
+copying tests/test_tuner.py -> sponge_ai-0.2.0/tests
+copying src/sponge_ai.egg-info/SOURCES.txt -> sponge_ai-0.2.0/src/sponge_ai.egg-info
+Writing sponge_ai-0.2.0/setup.cfg
+Creating tar archive
+removing 'sponge_ai-0.2.0' (and everything under it)
+Building wheel from source distribution...
+/Users/lc/.cache/uv/builds-v0/.tmpurLcUY/lib/python3.12/site-packages/setuptools/config/_apply_pyprojecttoml.py:82: SetuptoolsDeprecationWarning: `project.license` as a TOML table is deprecated
+!!
+
+        ********************************************************************************
+        Please use a simple string containing a SPDX expression for `project.license`. You can also use `project.license-files`. (Both options available on setuptools>=77.0.0).
+
+        By 2027-Feb-18, you need to update your project and remove deprecated calls
+        or your builds will no longer be supported.
+
+        See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+        ********************************************************************************
+
+!!
+  corresp(dist, value, root_dir)
+/Users/lc/.cache/uv/builds-v0/.tmpurLcUY/lib/python3.12/site-packages/setuptools/config/_apply_pyprojecttoml.py:61: SetuptoolsDeprecationWarning: License classifiers are deprecated.
+!!
+
+        ********************************************************************************
+        Please consider removing the following classifiers in favor of a SPDX license expression:
+
+        License :: OSI Approved :: MIT License
+
+        See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+        ********************************************************************************
+
+!!
+  dist._finalize_license_expression()
+/Users/lc/.cache/uv/builds-v0/.tmpurLcUY/lib/python3.12/site-packages/setuptools/dist.py:765: SetuptoolsDeprecationWarning: License classifiers are deprecated.
+!!
+
+        ********************************************************************************
+        Please consider removing the following classifiers in favor of a SPDX license expression:
+
+        License :: OSI Approved :: MIT License
+
+        See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+        ********************************************************************************
+
+!!
+  self._finalize_license_expression()
+running egg_info
+writing src/sponge_ai.egg-info/PKG-INFO
+writing dependency_links to src/sponge_ai.egg-info/dependency_links.txt
+writing entry points to src/sponge_ai.egg-info/entry_points.txt
+writing requirements to src/sponge_ai.egg-info/requires.txt
+writing top-level names to src/sponge_ai.egg-info/top_level.txt
+reading manifest file 'src/sponge_ai.egg-info/SOURCES.txt'
+adding license file 'LICENSE'
+writing manifest file 'src/sponge_ai.egg-info/SOURCES.txt'
+/Users/lc/.cache/uv/builds-v0/.tmpurLcUY/lib/python3.12/site-packages/setuptools/config/_apply_pyprojecttoml.py:82: SetuptoolsDeprecationWarning: `project.license` as a TOML table is deprecated
+!!
+
+        ********************************************************************************
+        Please use a simple string containing a SPDX expression for `project.license`. You can also use `project.license-files`. (Both options available on setuptools>=77.0.0).
+
+        By 2027-Feb-18, you need to update your project and remove deprecated calls
+        or your builds will no longer be supported.
+
+        See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+        ********************************************************************************
+
+!!
+  corresp(dist, value, root_dir)
+/Users/lc/.cache/uv/builds-v0/.tmpurLcUY/lib/python3.12/site-packages/setuptools/config/_apply_pyprojecttoml.py:61: SetuptoolsDeprecationWarning: License classifiers are deprecated.
+!!
+
+        ********************************************************************************
+        Please consider removing the following classifiers in favor of a SPDX license expression:
+
+        License :: OSI Approved :: MIT License
+
+        See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+        ********************************************************************************
+
+!!
+  dist._finalize_license_expression()
+/Users/lc/.cache/uv/builds-v0/.tmpurLcUY/lib/python3.12/site-packages/setuptools/dist.py:765: SetuptoolsDeprecationWarning: License classifiers are deprecated.
+!!
+
+        ********************************************************************************
+        Please consider removing the following classifiers in favor of a SPDX license expression:
+
+        License :: OSI Approved :: MIT License
+
+        See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+        ********************************************************************************
+
+!!
+  self._finalize_license_expression()
+running bdist_wheel
+running build
+running build_py
+creating build/lib/sponge
+copying src/sponge/__init__.py -> build/lib/sponge
+copying src/sponge/__main__.py -> build/lib/sponge
+creating build/lib/sponge/llm
+copying src/sponge/llm/token_counter.py -> build/lib/sponge/llm
+copying src/sponge/llm/deepseek_provider.py -> build/lib/sponge/llm
+copying src/sponge/llm/__init__.py -> build/lib/sponge/llm
+copying src/sponge/llm/factory.py -> build/lib/sponge/llm
+copying src/sponge/llm/openai_provider.py -> build/lib/sponge/llm
+copying src/sponge/llm/openrouter_provider.py -> build/lib/sponge/llm
+copying src/sponge/llm/anthropic_provider.py -> build/lib/sponge/llm
+copying src/sponge/llm/base.py -> build/lib/sponge/llm
+creating build/lib/sponge/core
+copying src/sponge/core/task.py -> build/lib/sponge/core
+copying src/sponge/core/reflection.py -> build/lib/sponge/core
+copying src/sponge/core/session.py -> build/lib/sponge/core
+copying src/sponge/core/__init__.py -> build/lib/sponge/core
+copying src/sponge/core/context.py -> build/lib/sponge/core
+copying src/sponge/core/agent.py -> build/lib/sponge/core
+copying src/sponge/core/decomposer.py -> build/lib/sponge/core
+copying src/sponge/core/context_planner.py -> build/lib/sponge/core
+copying src/sponge/core/condenser.py -> build/lib/sponge/core
+creating build/lib/sponge/memory
+copying src/sponge/memory/store.py -> build/lib/sponge/memory
+copying src/sponge/memory/__init__.py -> build/lib/sponge/memory
+copying src/sponge/memory/reflective.py -> build/lib/sponge/memory
+creating build/lib/sponge/cache
+copying src/sponge/cache/result_cache.py -> build/lib/sponge/cache
+copying src/sponge/cache/repo_state.py -> build/lib/sponge/cache
+copying src/sponge/cache/disk_store.py -> build/lib/sponge/cache
+copying src/sponge/cache/__init__.py -> build/lib/sponge/cache
+copying src/sponge/cache/semantic_cache.py -> build/lib/sponge/cache
+creating build/lib/sponge/config
+copying src/sponge/config/__init__.py -> build/lib/sponge/config
+copying src/sponge/config/settings.py -> build/lib/sponge/config
+creating build/lib/sponge/plugins
+copying src/sponge/plugins/registry.py -> build/lib/sponge/plugins
+copying src/sponge/plugins/mcp_plugin.py -> build/lib/sponge/plugins
+copying src/sponge/plugins/__init__.py -> build/lib/sponge/plugins
+copying src/sponge/plugins/mcp_client.py -> build/lib/sponge/plugins
+copying src/sponge/plugins/base.py -> build/lib/sponge/plugins
+creating build/lib/sponge/cost
+copying src/sponge/cost/models.py -> build/lib/sponge/cost
+copying src/sponge/cost/ledger.py -> build/lib/sponge/cost
+copying src/sponge/cost/__init__.py -> build/lib/sponge/cost
+copying src/sponge/cost/pricing.py -> build/lib/sponge/cost
+copying src/sponge/cost/tracker.py -> build/lib/sponge/cost
+creating build/lib/sponge/desktop
+copying src/sponge/desktop/server.py -> build/lib/sponge/desktop
+copying src/sponge/desktop/__init__.py -> build/lib/sponge/desktop
+creating build/lib/sponge/utils
+copying src/sponge/utils/logging.py -> build/lib/sponge/utils
+copying src/sponge/utils/__init__.py -> build/lib/sponge/utils
+copying src/sponge/utils/retry.py -> build/lib/sponge/utils
+copying src/sponge/utils/errors.py -> build/lib/sponge/utils
+creating build/lib/sponge/cli
+copying src/sponge/cli/run.py -> build/lib/sponge/cli
+copying src/sponge/cli/memory_cmd.py -> build/lib/sponge/cli
+copying src/sponge/cli/config_cmd.py -> build/lib/sponge/cli
+copying src/sponge/cli/tune_cmd.py -> build/lib/sponge/cli
+copying src/sponge/cli/benchmark_cmd.py -> build/lib/sponge/cli
+copying src/sponge/cli/__init__.py -> build/lib/sponge/cli
+copying src/sponge/cli/desktop_cmd.py -> build/lib/sponge/cli
+copying src/sponge/cli/app.py -> build/lib/sponge/cli
+copying src/sponge/cli/session_cmd.py -> build/lib/sponge/cli
+copying src/sponge/cli/cost_cmd.py -> build/lib/sponge/cli
+copying src/sponge/cli/reflections_cmd.py -> build/lib/sponge/cli
+creating build/lib/sponge/sandbox
+copying src/sponge/sandbox/__init__.py -> build/lib/sponge/sandbox
+copying src/sponge/sandbox/subprocess_sandbox.py -> build/lib/sponge/sandbox
+creating build/lib/sponge/telemetry
+copying src/sponge/telemetry/models.py -> build/lib/sponge/telemetry
+copying src/sponge/telemetry/analyzer.py -> build/lib/sponge/telemetry
+copying src/sponge/telemetry/collector.py -> build/lib/sponge/telemetry
+copying src/sponge/telemetry/__init__.py -> build/lib/sponge/telemetry
+copying src/sponge/telemetry/tuner.py -> build/lib/sponge/telemetry
+creating build/lib/sponge/approval
+copying src/sponge/approval/__init__.py -> build/lib/sponge/approval
+creating build/lib/sponge/plugins/builtins
+copying src/sponge/plugins/builtins/shell.py -> build/lib/sponge/plugins/builtins
+copying src/sponge/plugins/builtins/file_ops.py -> build/lib/sponge/plugins/builtins
+copying src/sponge/plugins/builtins/__init__.py -> build/lib/sponge/plugins/builtins
+copying src/sponge/plugins/builtins/search.py -> build/lib/sponge/plugins/builtins
+running egg_info
+writing src/sponge_ai.egg-info/PKG-INFO
+writing dependency_links to src/sponge_ai.egg-info/dependency_links.txt
+writing entry points to src/sponge_ai.egg-info/entry_points.txt
+writing requirements to src/sponge_ai.egg-info/requires.txt
+writing top-level names to src/sponge_ai.egg-info/top_level.txt
+reading manifest file 'src/sponge_ai.egg-info/SOURCES.txt'
+adding license file 'LICENSE'
+writing manifest file 'src/sponge_ai.egg-info/SOURCES.txt'
+creating build/lib/sponge/desktop/static
+copying src/sponge/desktop/static/index.html -> build/lib/sponge/desktop/static
+copying src/sponge/desktop/static/index.html -> build/lib/sponge/desktop/static
+installing to build/bdist.macosx-11.0-arm64/wheel
+running install
+running install_lib
+creating build/bdist.macosx-11.0-arm64/wheel
+creating build/bdist.macosx-11.0-arm64/wheel/sponge
+creating build/bdist.macosx-11.0-arm64/wheel/sponge/llm
+copying build/lib/sponge/llm/token_counter.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/llm
+copying build/lib/sponge/llm/deepseek_provider.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/llm
+copying build/lib/sponge/llm/__init__.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/llm
+copying build/lib/sponge/llm/factory.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/llm
+copying build/lib/sponge/llm/openai_provider.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/llm
+copying build/lib/sponge/llm/openrouter_provider.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/llm
+copying build/lib/sponge/llm/anthropic_provider.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/llm
+copying build/lib/sponge/llm/base.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/llm
+creating build/bdist.macosx-11.0-arm64/wheel/sponge/core
+copying build/lib/sponge/core/task.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/core
+copying build/lib/sponge/core/reflection.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/core
+copying build/lib/sponge/core/session.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/core
+copying build/lib/sponge/core/__init__.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/core
+copying build/lib/sponge/core/context.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/core
+copying build/lib/sponge/core/agent.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/core
+copying build/lib/sponge/core/decomposer.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/core
+copying build/lib/sponge/core/context_planner.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/core
+copying build/lib/sponge/core/condenser.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/core
+creating build/bdist.macosx-11.0-arm64/wheel/sponge/memory
+copying build/lib/sponge/memory/store.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/memory
+copying build/lib/sponge/memory/__init__.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/memory
+copying build/lib/sponge/memory/reflective.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/memory
+creating build/bdist.macosx-11.0-arm64/wheel/sponge/cache
+copying build/lib/sponge/cache/result_cache.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/cache
+copying build/lib/sponge/cache/repo_state.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/cache
+copying build/lib/sponge/cache/disk_store.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/cache
+copying build/lib/sponge/cache/__init__.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/cache
+copying build/lib/sponge/cache/semantic_cache.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/cache
+creating build/bdist.macosx-11.0-arm64/wheel/sponge/config
+copying build/lib/sponge/config/__init__.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/config
+copying build/lib/sponge/config/settings.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/config
+creating build/bdist.macosx-11.0-arm64/wheel/sponge/plugins
+copying build/lib/sponge/plugins/registry.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/plugins
+copying build/lib/sponge/plugins/mcp_plugin.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/plugins
+copying build/lib/sponge/plugins/__init__.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/plugins
+creating build/bdist.macosx-11.0-arm64/wheel/sponge/plugins/builtins
+copying build/lib/sponge/plugins/builtins/shell.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/plugins/builtins
+copying build/lib/sponge/plugins/builtins/file_ops.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/plugins/builtins
+copying build/lib/sponge/plugins/builtins/__init__.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/plugins/builtins
+copying build/lib/sponge/plugins/builtins/search.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/plugins/builtins
+copying build/lib/sponge/plugins/mcp_client.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/plugins
+copying build/lib/sponge/plugins/base.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/plugins
+creating build/bdist.macosx-11.0-arm64/wheel/sponge/cost
+copying build/lib/sponge/cost/models.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/cost
+copying build/lib/sponge/cost/ledger.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/cost
+copying build/lib/sponge/cost/__init__.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/cost
+copying build/lib/sponge/cost/pricing.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/cost
+copying build/lib/sponge/cost/tracker.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/cost
+copying build/lib/sponge/__init__.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge
+creating build/bdist.macosx-11.0-arm64/wheel/sponge/desktop
+copying build/lib/sponge/desktop/server.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/desktop
+copying build/lib/sponge/desktop/__init__.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/desktop
+creating build/bdist.macosx-11.0-arm64/wheel/sponge/desktop/static
+copying build/lib/sponge/desktop/static/index.html -> build/bdist.macosx-11.0-arm64/wheel/./sponge/desktop/static
+creating build/bdist.macosx-11.0-arm64/wheel/sponge/utils
+copying build/lib/sponge/utils/logging.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/utils
+copying build/lib/sponge/utils/__init__.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/utils
+copying build/lib/sponge/utils/retry.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/utils
+copying build/lib/sponge/utils/errors.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/utils
+creating build/bdist.macosx-11.0-arm64/wheel/sponge/cli
+copying build/lib/sponge/cli/run.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/cli
+copying build/lib/sponge/cli/memory_cmd.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/cli
+copying build/lib/sponge/cli/config_cmd.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/cli
+copying build/lib/sponge/cli/tune_cmd.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/cli
+copying build/lib/sponge/cli/benchmark_cmd.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/cli
+copying build/lib/sponge/cli/__init__.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/cli
+copying build/lib/sponge/cli/desktop_cmd.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/cli
+copying build/lib/sponge/cli/app.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/cli
+copying build/lib/sponge/cli/session_cmd.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/cli
+copying build/lib/sponge/cli/cost_cmd.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/cli
+copying build/lib/sponge/cli/reflections_cmd.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/cli
+creating build/bdist.macosx-11.0-arm64/wheel/sponge/sandbox
+copying build/lib/sponge/sandbox/__init__.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/sandbox
+copying build/lib/sponge/sandbox/subprocess_sandbox.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/sandbox
+creating build/bdist.macosx-11.0-arm64/wheel/sponge/telemetry
+copying build/lib/sponge/telemetry/models.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/telemetry
+copying build/lib/sponge/telemetry/analyzer.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/telemetry
+copying build/lib/sponge/telemetry/collector.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/telemetry
+copying build/lib/sponge/telemetry/__init__.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/telemetry
+copying build/lib/sponge/telemetry/tuner.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/telemetry
+copying build/lib/sponge/__main__.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge
+creating build/bdist.macosx-11.0-arm64/wheel/sponge/approval
+copying build/lib/sponge/approval/__init__.py -> build/bdist.macosx-11.0-arm64/wheel/./sponge/approval
+running install_egg_info
+Copying src/sponge_ai.egg-info to build/bdist.macosx-11.0-arm64/wheel/./sponge_ai-0.2.0-py3.12.egg-info
+running install_scripts
+creating build/bdist.macosx-11.0-arm64/wheel/sponge_ai-0.2.0.dist-info/WHEEL
+creating '/Users/lc/sponge/dist/.tmp-x3b54nb0/sponge_ai-0.2.0-py3-none-any.whl' and adding 'build/bdist.macosx-11.0-arm64/wheel' to it
+adding 'sponge/__init__.py'
+adding 'sponge/__main__.py'
+adding 'sponge/approval/__init__.py'
+
+[… truncated 2769 chars …]

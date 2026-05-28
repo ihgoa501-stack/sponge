@@ -1,6 +1,6 @@
 {
   "name": "sponge-ai",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Cost-optimal AI agent harness — use the best model, pay the least",
   "license": "MIT",
   "repository": {

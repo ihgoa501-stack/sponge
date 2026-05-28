@@ -14,6 +14,10 @@ class Task:
     model: str | None = None
     system_prompt: str = ""
     images: list[str] | None = None
+    failed: bool = False
+    """Set by caller to indicate this is a retry after a known failure."""
+    failure_reason: str = ""
+    """Human-readable reason for the failure, used as input to reflection."""
 
 
 @dataclass
@@ -26,3 +30,9 @@ class TaskResult:
     fingerprint: CostFingerprint
     cache_hit: bool
     cache_source: str = ""  # "exact", "semantic", or ""
+    failed: bool = False
+    """Whether the task failed (user correction, tool error, quality flag)."""
+    failure_reason: str = ""
+    """Human-readable reason for failure, used as input to reflection."""
+    lesson_stored: str = ""
+    """ID of the lesson stored from this failure, if any."""

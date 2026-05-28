@@ -3,36 +3,272 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sponge Desktop</title>
+<title>Sponge — Agent Harness</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <style>
+/* ── DESIGN.md tokens ── */
+:root {
+  --canvas:       #2b2622;
+  --canvas-soft:  #383330;
+  --hairline:     #3f3a36;
+  --primary:      #2dd4bf;
+  --primary-deep: #14b8a6;
+  --on-primary:   #1a1a1a;
+  --ink:          #f7f5f0;
+  --body:         #c9c0ad;
+  --body-strong:  #dad2c1;
+  --mute:         #aea69c;
+  --success:      #22c55e;
+  --warning:      #f59e0b;
+  --error:        #ef4444;
+  --info:         #60a5fa;
+  --font-sans:    'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:    'DM Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --radius-sm:    4px;
+  --radius-md:    6px;
+  --radius-lg:    8px;
+  --radius-pill:  9999px;
+  --space-xs:     4px;
+  --space-sm:     8px;
+  --space-md:     12px;
+  --space-lg:     16px;
+  --space-xl:     24px;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, system-ui, sans-serif; background: #1a1a2e; color: #e0e0e0; height: 100vh; display: flex; }
-#chat-panel { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-#messages { flex: 1; overflow-y: auto; padding: 20px; }
-#cost-panel { width: 260px; background: #16213e; padding: 20px; display: flex; flex-direction: column; gap: 16px; border-left: 1px solid #0f3460; }
-#cost-panel h3 { color: #e94560; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
-.cost-row { display: flex; justify-content: space-between; font-size: 14px; }
-.cost-val { font-weight: bold; color: #53d769; }
-#input-area { padding: 16px 20px; border-top: 1px solid #0f3460; display: flex; gap: 10px; }
-#input-area input { flex: 1; padding: 12px 16px; border: 1px solid #0f3460; border-radius: 8px; background: #16213e; color: #e0e0e0; font-size: 14px; outline: none; }
-#input-area input:focus { border-color: #e94560; }
-#input-area button { padding: 12px 24px; background: #e94560; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
-#input-area button:hover { background: #c73652; }
-#input-area button:disabled { opacity: 0.5; cursor: default; }
-#attach-btn { padding: 12px 14px; background: #16213e; color: #e0e0e0; border: 1px solid #0f3460; border-radius: 8px; cursor: pointer; font-size: 16px; }
-#attach-btn:hover { border-color: #e94560; }
-#image-preview { display: flex; gap: 6px; flex-wrap: wrap; padding: 4px 0; }
-#image-preview img { height: 48px; border-radius: 4px; border: 1px solid #0f3460; }
-.msg .img-preview { max-width: 200px; max-height: 150px; border-radius: 4px; margin-top: 6px; }
-.msg { margin-bottom: 16px; line-height: 1.6; }
-.msg.user { color: #a0a0c0; }
-.msg.assistant { color: #e0e0e0; }
-.msg .role { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-.msg.user .role { color: #e94560; }
-.msg.assistant .role { color: #53d769; }
-.msg .text { font-size: 14px; white-space: pre-wrap; word-break: break-word; }
-.loading { display: inline-block; width: 8px; height: 8px; background: #e94560; border-radius: 50%; animation: pulse 0.6s infinite alternate; }
-@keyframes pulse { to { opacity: 0.3; } }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--canvas);
+  color: var(--body);
+  height: 100vh;
+  display: flex;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── Chat panel ── */
+#chat-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+#messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-xl);
+  scroll-behavior: smooth;
+}
+
+/* ── Messages ── */
+.msg {
+  margin-bottom: var(--space-xl);
+  max-width: 720px;
+}
+.msg .role {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-xs);
+}
+.msg.user .role  { color: var(--mute); }
+.msg.assistant .role { color: var(--primary); }
+.msg.system .role { color: var(--warning); }
+.msg .text {
+  font-size: 14px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--ink);
+}
+.msg.user .text { color: var(--body); }
+.msg .img-preview {
+  max-width: 240px;
+  max-height: 160px;
+  border-radius: var(--radius-sm);
+  margin-top: var(--space-sm);
+  border: 1px solid var(--hairline);
+}
+
+/* ── Input area ── */
+#input-area {
+  padding: var(--space-lg) var(--space-xl);
+  border-top: 1px solid var(--hairline);
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+  background: var(--canvas);
+}
+#input-area input[type="text"] {
+  flex: 1;
+  padding: 10px var(--space-md);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-sm);
+  background: var(--canvas-soft);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+#input-area input[type="text"]:focus {
+  border-color: var(--primary);
+}
+#input-area input[type="text"]::placeholder {
+  color: var(--mute);
+}
+#attach-btn {
+  padding: 10px 12px;
+  background: var(--canvas-soft);
+  color: var(--body-strong);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 16px;
+  font-family: var(--font-sans);
+  transition: border-color 0.15s;
+}
+#attach-btn:hover { border-color: var(--primary); }
+#send-btn {
+  padding: 10px 20px;
+  background: var(--primary);
+  color: var(--on-primary);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+#send-btn:hover { background: var(--primary-deep); }
+#send-btn:disabled { opacity: 0.4; cursor: default; }
+
+#image-preview {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  padding: var(--space-xs) var(--space-xl);
+}
+#image-preview img {
+  height: 44px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--hairline);
+}
+
+/* ── Cost panel ── */
+#cost-panel {
+  width: 264px;
+  background: var(--canvas-soft);
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  border-left: 1px solid var(--hairline);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  overflow-y: auto;
+}
+#cost-panel h3 {
+  color: var(--mute);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 400;
+  padding-top: var(--space-sm);
+}
+#cost-panel h3:first-child { padding-top: 0; }
+.cost-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 13px;
+  color: var(--body);
+  padding: 2px 0;
+}
+.cost-val {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--primary);
+}
+.cost-naive-val {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--mute);
+}
+.cost-savings {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--success);
+}
+.cost-divider {
+  border: none;
+  border-top: 1px solid var(--hairline);
+  margin: var(--space-xs) 0;
+}
+.cache-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.cache-hit  { background: rgba(34,197,94,0.15); color: var(--success); }
+.cache-miss { background: rgba(245,158,11,0.12); color: var(--warning); }
+.plugin-hit { background: rgba(96,165,250,0.12); color: var(--info); }
+.savings-pct {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--primary);
+  text-align: center;
+  padding: var(--space-sm) 0;
+}
+
+/* ── Loading indicator ── */
+.loading {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--primary);
+  border-radius: 50%;
+  animation: pulse 0.7s infinite alternate;
+}
+@keyframes pulse { to { opacity: 0.2; transform: scale(0.85); } }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--hairline); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--mute); }
+
+/* ── Responsive ── */
+@media (max-width: 700px) {
+  body { flex-direction: column; }
+  #cost-panel {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    border-left: none;
+    border-top: 1px solid var(--hairline);
+    font-size: 12px;
+    max-height: 140px;
+  }
+  #cost-panel h3 { width: 100%; }
+  #cost-panel .cost-row { width: auto; gap: var(--space-md); }
+  #messages { padding: var(--space-md); }
+  #input-area { padding: var(--space-md); }
+}
 </style>
 </head>
 <body>
@@ -42,22 +278,24 @@ body { font-family: -apple-system, system-ui, sans-serif; background: #1a1a2e; c
   <div id="image-preview"></div>
   <div id="input-area">
     <input type="file" id="file-input" accept="image/*" style="display:none" multiple>
-    <button id="attach-btn" onclick="document.getElementById('file-input').click()">📎</button>
-    <input type="text" id="msg-input" placeholder="Type your task..." autofocus>
+    <button id="attach-btn" onclick="document.getElementById('file-input').click()" title="Attach image">+</button>
+    <input type="text" id="msg-input" placeholder="Describe your task…" autofocus>
     <button id="send-btn" onclick="send()">Send</button>
   </div>
 </div>
 
 <div id="cost-panel">
-  <h3>Session Cost</h3>
+  <h3>Cost</h3>
   <div class="cost-row"><span>Actual</span><span class="cost-val" id="cost-actual">$0.0000</span></div>
-  <div class="cost-row"><span>Naive</span><span id="cost-naive">$0.0000</span></div>
-  <div class="cost-row"><span>Saved</span><span class="cost-val" id="cost-saved">$0.0000</span></div>
-  <div class="cost-row"><span>Rate</span><span class="cost-val" id="cost-pct">0%</span></div>
-  <h3 style="margin-top:12px">Calls</h3>
-  <div class="cost-row"><span>LLM</span><span id="calls-llm">0</span></div>
-  <div class="cost-row"><span>Cache hits</span><span id="calls-cache">0</span></div>
-  <div class="cost-row"><span>Plugin</span><span id="calls-plugin">0</span></div>
+  <div class="cost-row"><span>Naive</span><span class="cost-naive-val" id="cost-naive">$0.0000</span></div>
+  <div class="cost-row"><span>Saved</span><span class="cost-savings" id="cost-saved">$0.0000</span></div>
+  <hr class="cost-divider">
+  <div class="savings-pct" id="savings-pct">—</div>
+  <hr class="cost-divider">
+  <h3>Breakdown</h3>
+  <div class="cost-row"><span>LLM calls</span><span class="cost-naive-val" id="calls-llm">0</span></div>
+  <div class="cost-row"><span>Cache</span><span id="calls-cache"></span></div>
+  <div class="cost-row"><span>Plugin</span><span class="cost-naive-val" id="calls-plugin">0</span></div>
 </div>
 
 <script>
@@ -145,13 +383,13 @@ async function send() {
             if (data.cost === 0 && !data.cache_hit) pluginCalls++;
             updateCostPanel(data);
           } else if (eventType === 'error') {
-            aiDiv.querySelector('.text').innerHTML = '<span style="color:#e94560">Error: ' + escapeHtml(data.message) + '</span>';
+            aiDiv.querySelector('.text').innerHTML = '<span style="color:var(--error)">Error: ' + escapeHtml(data.message) + '</span>';
           }
         }
       }
     }
   } catch (e) {
-    aiDiv.querySelector('.text').innerHTML = '<span style="color:#e94560">Connection error</span>';
+    aiDiv.querySelector('.text').innerHTML = '<span style="color:var(--error)">Connection error</span>';
   }
 
   input.disabled = false;
@@ -162,7 +400,7 @@ async function send() {
 function addMessage(role, text) {
   const div = document.createElement('div');
   div.className = 'msg ' + role;
-  div.innerHTML = '<div class="role">' + (role === 'user' ? 'You' : 'Sponge') + '</div><div class="text">' + text + '</div>';
+  div.innerHTML = '<div class="role">' + (role === 'user' ? 'YOU' : (role === 'system' ? '·' : 'SPONGE')) + '</div><div class="text">' + text + '</div>';
   document.getElementById('messages').appendChild(div);
   document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
   return div;
@@ -174,10 +412,21 @@ function updateCostPanel(data) {
   const saved = totalNaive - totalCost;
   document.getElementById('cost-saved').textContent = '$' + saved.toFixed(4);
   const pct = totalNaive > 0 ? (saved / totalNaive * 100) : 0;
-  document.getElementById('cost-pct').textContent = pct.toFixed(1) + '%';
+  const pctEl = document.getElementById('savings-pct');
+  pctEl.textContent = pct >= 90 ? pct.toFixed(0) + '% saved' : (pct > 0 ? pct.toFixed(1) + '%' : '—');
   document.getElementById('calls-llm').textContent = callCount - cacheHits - pluginCalls;
-  document.getElementById('calls-cache').textContent = cacheHits;
-  document.getElementById('calls-plugin').textContent = pluginCalls;
+  const cacheEl = document.getElementById('calls-cache');
+  if (cacheHits > 0) {
+    cacheEl.innerHTML = '<span class="cache-badge cache-hit">' + cacheHits + ' hits</span>';
+  } else {
+    cacheEl.innerHTML = '<span class="cache-badge cache-miss">0</span>';
+  }
+  const pluginVal = document.getElementById('calls-plugin');
+  if (pluginCalls > 0) {
+    pluginVal.innerHTML = '<span class="cache-badge plugin-hit">' + pluginCalls + '</span>';
+  } else {
+    pluginVal.textContent = '0';
+  }
 }
 
 function escapeHtml(s) {

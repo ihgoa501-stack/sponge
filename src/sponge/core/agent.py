@@ -13,6 +13,7 @@ from sponge.core.condenser import CondensedResult, SubAgentCondenser
 from sponge.core.context import ContextCompressor
 from sponge.core.context_planner import ContextPlanner
 from sponge.core.decomposer import TaskDecomposer
+from sponge.core.reflection import Lesson, ReflectionModule
 from sponge.core.session import Session, Turn
 from sponge.core.task import Task, TaskResult
 from sponge.cost.models import CostEntry, Usage
@@ -20,6 +21,7 @@ from sponge.cost.pricing import get_model_pricing
 from sponge.cost.tracker import CostTracker
 from sponge.llm.base import ContentDelta, LLMProvider, Message, UsageEvent
 from sponge.llm.token_counter import count_tokens
+from sponge.memory.reflective import ReflectiveMemory
 from sponge.memory.store import ProjectMemory
 from sponge.plugins.registry import PluginRegistry
 from sponge.telemetry.collector import TelemetryCollector
@@ -39,6 +41,10 @@ class AgentServices:
     context_planner: ContextPlanner | None = None
     semantic_cache: SemanticCache | None = None
     memory: ProjectMemory | None = None
+    reflective_memory: ReflectiveMemory | None = None
+    """Phase 7: stores lessons extracted from failures."""
+    reflection_module: ReflectionModule | None = None
+    """Phase 7: the bronze mirror — generates structured self-evaluation."""
 
 
 class Agent:
@@ -177,9 +183,44 @@ class Agent:
                     cache_source="semantic",
                 )
 
+        # 1.7. Retrieve relevant lessons from reflective memory.
+        lessons_context = ""
+        lessons_retrieved = 0
+        if self._svc.reflective_memory is not None:
+            lessons_context = self._svc.reflective_memory.to_context(task.prompt)
+            if lessons_context:
+                lessons_retrieved = lessons_context.count("[ref_")
+                logger.debug("Retrieved %d lessons for task", lessons_retrieved)
+
         # 2. Stream from provider (with retry).
-        messages = self._build_messages(task)
+        messages = self._build_messages(task, lessons_context)
         response, cost_entry = await self._stream_with_retry(messages, model)
+
+        # 2.5. Reflect on failure if reflective memory is configured.
+        lesson_stored = ""
+        reflection_tokens = 0
+        if task.failed and self._svc.reflection_module is not None:
+            logger.info("Task failed — triggering reflection")
+            reflection_result = await self._svc.reflection_module.reflect(
+                task_prompt=task.prompt,
+                messages=messages,
+                response=response,
+                failure_reason=task.failure_reason or "Task was marked as failed.",
+                model=model,
+            )
+            if reflection_result is not None:
+                from sponge.core.reflection import extract_lesson
+
+                lesson = extract_lesson(
+                    reflection_result,
+                    task.prompt,
+                    condition_tags=_derive_condition_tags(task),
+                )
+                if self._svc.reflective_memory is not None:
+                    stored = self._svc.reflective_memory.store(lesson)
+                    lesson_stored = stored.id
+                    logger.info("Stored lesson %s: %s", stored.id, lesson.lesson)
+                reflection_tokens = ReflectionModule.ESTIMATED_TOKENS
 
         # 3. Record fingerprint.
         fp = self._make_fingerprint(
@@ -190,6 +231,9 @@ class Agent:
             cache_hit=False,
             experiment_id=experiment_id,
             experiment_group=experiment_group,
+            reflection_tokens=reflection_tokens,
+            lessons_retrieved=lessons_retrieved,
+            lesson_stored=lesson_stored,
         )
         self._collector.log_call(fp)
 
@@ -209,6 +253,9 @@ class Agent:
             cost_entry=cost_entry,
             fingerprint=fp,
             cache_hit=False,
+            failed=task.failed,
+            failure_reason=task.failure_reason,
+            lesson_stored=lesson_stored,
         )
 
     async def run_decomposed(self, task: Task) -> TaskResult:
@@ -396,9 +443,14 @@ class Agent:
             cache_hit=False,
         )
 
-    def _build_messages(self, task: Task) -> list[Message]:
+    def _build_messages(
+        self, task: Task, lessons_context: str = ""
+    ) -> list[Message]:
         messages: list[Message] = []
-        # Inject project memory as first system message.
+        # Inject reflective lessons first (highest priority context).
+        if lessons_context:
+            messages.append(Message(role="system", content=lessons_context))
+        # Inject project memory as system message.
         if self._svc.memory is not None:
             mem_prompt = self._svc.memory.to_system_prompt()
             if mem_prompt:
@@ -451,6 +503,9 @@ class Agent:
         cache_hit: bool,
         experiment_id: str | None = None,
         experiment_group: str | None = None,
+        reflection_tokens: int = 0,
+        lessons_retrieved: int = 0,
+        lesson_stored: str = "",
     ) -> CostFingerprint:
         from sponge.cache.repo_state import get_repo_state
 
@@ -470,4 +525,43 @@ class Agent:
             timestamp=datetime.now(UTC).isoformat(),
             experiment_id=experiment_id,
             experiment_group=experiment_group,
+            reflection_tokens=reflection_tokens,
+            lessons_retrieved=lessons_retrieved,
+            lesson_stored=lesson_stored,
         )
+
+
+def _derive_condition_tags(task: Task) -> list[str]:
+    """Derive condition tags from a task for lesson keying.
+
+    Heuristic: extract task type and context patterns from the prompt.
+    """
+    tags: list[str] = []
+    prompt_lower = task.prompt.lower()
+
+    # Task type tags.
+    if any(w in prompt_lower for w in ("edit", "change", "modify", "update", "fix", "refactor")):
+        tags.append("file_edit")
+    if any(w in prompt_lower for w in ("test", "pytest", "unittest")):
+        tags.append("test")
+    if any(w in prompt_lower for w in ("search", "find", "grep", "locate")):
+        tags.append("search")
+    if any(w in prompt_lower for w in ("run", "execute", "shell", "command")):
+        tags.append("shell_cmd")
+    if any(w in prompt_lower for w in ("read", "open", "view", "show", "inspect")):
+        tags.append("file_read")
+
+    # Failure mode tags (inferred from task.failed context).
+    if task.failed:
+        if task.failure_reason:
+            reason_lower = task.failure_reason.lower()
+            if any(w in reason_lower for w in ("test", "pytest", "fail", "error")):
+                tags.append("test_breakage")
+            if any(w in reason_lower for w in ("wrong", "incorrect", "not what")):
+                tags.append("quality_issue")
+            if any(w in reason_lower for w in ("timeout", "connection", "rate limit")):
+                tags.append("provider_error")
+
+    if not tags:
+        tags.append("general")
+    return tags

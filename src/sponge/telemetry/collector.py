@@ -43,7 +43,10 @@ class TelemetryCollector:
                     repo_state TEXT NOT NULL DEFAULT '',
                     timestamp TEXT NOT NULL DEFAULT (datetime('now')),
                     experiment_id TEXT,
-                    experiment_group TEXT
+                    experiment_group TEXT,
+                    reflection_tokens INTEGER NOT NULL DEFAULT 0,
+                    lessons_retrieved INTEGER NOT NULL DEFAULT 0,
+                    lesson_stored TEXT NOT NULL DEFAULT ''
                 );
                 CREATE INDEX IF NOT EXISTS idx_session
                     ON fingerprints(session_id);
@@ -62,8 +65,9 @@ class TelemetryCollector:
                    (session_id, task_hash, model, provider,
                     tokens_in, tokens_out, cache_hit,
                     cost, naive_cost, repo_state, timestamp,
-                    experiment_id, experiment_group)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    experiment_id, experiment_group,
+                    reflection_tokens, lessons_retrieved, lesson_stored)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     fp.session_id,
                     fp.task_hash,
@@ -78,6 +82,9 @@ class TelemetryCollector:
                     fp.timestamp,
                     fp.experiment_id,
                     fp.experiment_group,
+                    fp.reflection_tokens,
+                    fp.lessons_retrieved,
+                    fp.lesson_stored,
                 ),
             )
             conn.commit()
@@ -89,7 +96,8 @@ class TelemetryCollector:
                 """SELECT session_id, task_hash, model, provider,
                           tokens_in, tokens_out, cache_hit,
                           cost, naive_cost, repo_state, timestamp,
-                          experiment_id, experiment_group
+                          experiment_id, experiment_group,
+                          reflection_tokens, lessons_retrieved, lesson_stored
                    FROM fingerprints
                    WHERE session_id = ?
                    ORDER BY id""",
@@ -110,6 +118,9 @@ class TelemetryCollector:
                 timestamp=r[10],
                 experiment_id=r[11],
                 experiment_group=r[12],
+                reflection_tokens=r[13] if len(r) > 13 else 0,
+                lessons_retrieved=r[14] if len(r) > 14 else 0,
+                lesson_stored=r[15] if len(r) > 15 else "",
             )
             for r in rows
         ]

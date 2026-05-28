@@ -3,10 +3,11 @@
 ## Project Identity
 
 - **Mission**: Reduce LLM cost to **1/10 of the original** through agent engineering architecture alone — same model, same task quality, one-tenth the tokens.
-- **Status**: Phase 0-3 components implemented. Agent loop, cost fingerprint, self-tuning closed loop, 4 providers, plugin routing, context compression, semantic cache, task decomposition, sub-agent condensation, progressive context loading, memory-based reuse. 106 tests, 59 source files. Some Phase 3 modules need additional test coverage (desktop, MCP, memory store).
+- **Status**: Feature-complete. Agent loop, cost fingerprint, self-tuning closed loop, 5 providers (Anthropic/OpenAI/DeepSeek/OpenRouter), plugin routing + approval gates, context compression, exact + semantic cache, task decomposition, sub-agent condensation, progressive context loading, memory-based reuse, desktop server, MCP integration, shell sandbox. 157 tests, 66 source files.
 - **Core principle**: The agent architecture itself is the cost-reduction engine. Not bolt-on cache layers. Not model downgrading. Every design decision — how tasks are decomposed, how context is loaded, how sub-agents return results, how memory is structured — exists to slash token consumption. The target is 1/10.
-- **Name metaphor**: Like a sponge — absorb maximum context, squeeze out maximum value. Every token sent to the model must justify its existence.
-- **Key differentiator**: Not features — architecture. Competitors add caching and compression as afterthoughts. Sponge designs the agent loop from first principles around token minimization. Task decomposition, progressive context loading, sub-agent condensation, and memory-based reuse are not features on a roadmap — they are the roadmap. Everything else is secondary.
+- **Core philosophy**: **Reflexion** — the agent learns from every failure. Not by training model weights, but by generating structured self-critique after each mistake, extracting a reusable lesson, and storing it in long-term memory. The next attempt retrieves those lessons, so the same mistake is never paid for twice. This is the engine that makes "越用越省钱" (cheaper over time) real: caching avoids re-computation, but Reflexion avoids re-failure. See [Core Philosophy: Reflexion](#core-philosophy-reflexion) below.
+- **Name metaphor**: Like a sponge — absorb maximum context, squeeze out maximum value. Every token sent to the model must justify its existence. But a sponge also holds what it absorbed — Sponge remembers lessons, not just water.
+- **Key differentiator**: Not features — architecture. Competitors add caching and compression as afterthoughts. Sponge designs the agent loop from first principles around token minimization. Task decomposition, progressive context loading, sub-agent condensation, and memory-based reuse are not features on a roadmap — they are the roadmap. Everything else is secondary. **Reflexion is the meta-layer that makes all of them smarter over time.**
 
 ## Current Agent Instructions
 
@@ -18,13 +19,12 @@ Read these files first, in order:
 2. `docs/worker-agent-guide.md` — implementation rules for worker agents.
 3. The specific phase plan assigned to you under `docs/superpowers/plans/`.
 
-Current implementation target:
+Current status — all planned phases complete:
 
-```text
-docs/superpowers/plans/2026-05-24-phase-1-cost-fingerprint.md
-```
+- Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ · Phase 3+ ✅
+- Remaining work: multimodal input (images, PDFs), 1/10 benchmark proof, PyPI publication.
 
-Phase 1 includes: agent loop, streaming LLM calls, exact result cache, savings ledger, and cost fingerprint recording. Do not implement context compression, plugin routing, semantic cache, sub-agents, or multimodal — those are Phase 3+ commodity features.
+For new feature work, read `docs/project-plan.md` and `docs/worker-agent-guide.md` first.
 
 Local development environment:
 
@@ -51,13 +51,82 @@ The target: **same model, same task quality, 1/10 the tokens.** This is not achi
 
 6. **Plugin Routing** — tasks that don't need LLM reasoning (file ops, shell commands, search) bypass the model entirely. $0 cost, 0 tokens.
 
+7. **Reflexion** — every failure triggers structured self-evaluation. The agent asks itself: what went wrong? What can I learn? Can I distill this into a rule for next time? Lessons are stored as queryable memory and retrieved when similar tasks appear. The same mistake is never paid for twice. This is the meta-layer: it doesn't save tokens on THIS call — it prevents wasted tokens on ALL FUTURE calls.
+
 The savings ledger tracks each mechanism independently, so the 1/10 claim is auditable per workload.
+
+## Core Philosophy: Reflexion
+
+> 永乐年间的景德镇，人人都知道有个叫阿九的学徒，想烧出传说中的天青釉。
+>
+> — *The Apprentice of Jingdezhen*
+
+Sponge's founding parable is the story of 阿九 (A-Jiu), an apprentice potter trying to recreate a lost ceramic glaze. He fails 49 kilns in a row. But after each failure, he looks into a bronze mirror left by his master — and the mirror asks him questions. Not answers. Questions: *What was different this time? Which variable changed? What did you learn last time that applies here?* After each conversation, A-Jiu carves a single lesson into a wooden pillar beside the kiln. Before each new attempt, he reads every lesson on the pillar. On his hundredth try, he produces the legendary glaze — not because the mirror was magic (it was just an ordinary bronze mirror), but because he had built a system for learning from failure.
+
+This is Reflexion, and it is Sponge's core philosophy.
+
+### The Mapping
+
+| 阿九's World | Sponge |
+|---|---|
+| 阿九 the apprentice | **The Agent** — facing a complex task with many interacting variables |
+| The kiln | **The task environment** — multi-step, high-dimensional, where failure is cheap but diagnosis is hard |
+| The bronze mirror | **The Reflection Module** — an LLM prompted as evaluator, not solver. It doesn't give answers; it asks questions that force the agent to locate the root cause of failure |
+| The wooden pillar + carved lessons | **Reflective Memory** — a structured store of lessons extracted from failures. Each lesson is a compact, retrievable rule: condition → action → observed outcome → extracted principle |
+| Reading the pillar before each firing | **Lesson Retrieval** — before attempting a task, the agent queries reflective memory for lessons relevant to the current context, injecting them as decision-guiding context |
+| 照镜子 → 刻字 → 读柱子 (mirror → carve → read) | **The Reflexion Loop**: Attempt → Fail → Self-Evaluate → Extract Lesson → Store → Retrieve on next attempt |
+
+### Why Reflexion is Cost-First Architecture
+
+Every failed attempt costs tokens. A naive agent retries blindly and pays the same cost again. A Reflexion-equipped agent pays for the failure ONCE, extracts a lesson, and never pays for that class of mistake again. Over a project's lifetime, the cumulative savings from avoided repeated failures dwarf any single-call optimization.
+
+Reflexion doesn't replace Sponge's other layers — it amplifies them:
+
+- **Task Decomposition** benefits when lessons about sub-task boundaries prevent over-decomposition.
+- **Sub-Agent Condensation** benefits when lessons about what to search for make exploration more targeted.
+- **Memory-Based Reuse** is the storage layer Reflexion writes into — reflective lessons are the highest-value memory.
+- **Cost Fingerprint + Replay** measures whether lessons actually reduce tokens on replay — closing the loop between "should save" and "does save."
+- **Plugin Routing** benefits when lessons about plugin reliability inform routing confidence thresholds.
+
+The target: **the agent that has run 100 tasks should be measurably cheaper per task than the agent that has run 10.** This is the 越用越省钱 (cheaper-over-time) guarantee — not from caching alone, but from accumulated wisdom.
+
+### Implementation Status
+
+Reflexion is the **architectural philosophy** guiding Sponge's design. The implementation path:
+
+| Component | Status |
+|---|---|
+| Reflection module (structured self-evaluation prompt) | ⏳ planned |
+| Lesson extraction (failure → compact rule) | ⏳ planned |
+| Reflective memory store (queryable lesson DB) | ⏳ planned |
+| Lesson retrieval (pre-task context injection) | ⏳ planned |
+| Reflexion loop integration (attempt → reflect → store → retrieve) | ⏳ planned |
+| Closed-loop measurement (do lessons actually reduce tokens?) | ⏳ planned |
 
 ## Coding Capability Status
 
-- **Phase 0-2 (complete, tested):** single/multi-turn conversations, cost tracking, self-tuning, context compression, plugin routing, 4 LLM providers, exact + semantic cache, savings ledger, CLI.
-- **Phase 3 (implemented, needs test coverage):** task decomposition, sub-agent condensation, progressive context loading (ContextPlanner), memory-based reuse (ProjectMemory), desktop server, MCP plugin.
-- **Phase 4 (planned):** approval gates & permissions (stub at `src/sponge/approval/`).
+All planned components are implemented and tested (157 tests passing):
+
+| Capability | Status |
+|-----------|--------|
+| Agent loop + streaming (5 providers) | ✅ |
+| Cost tracking + savings ledger | ✅ |
+| Exact result cache (SHA256, SQLite) | ✅ |
+| Semantic cache (Jaccard similarity) | ✅ |
+| Cost fingerprint + telemetry | ✅ |
+| Self-tuning replay optimizer | ✅ |
+| Context compression (5-layer) | ✅ |
+| Plugin routing + approval gates | ✅ |
+| Task decomposition | ✅ |
+| Sub-agent condensation | ✅ |
+| Progressive context loading | ✅ |
+| Memory-based reuse | ✅ |
+| MCP server integration | ✅ |
+| Desktop server | ✅ |
+| Shell sandbox | ✅ |
+| Reflexion (structured self-evaluation + lesson memory) | ⏳ not yet |
+| Multimodal input | ⏳ not yet |
+| 1/10 benchmark proof | ⏳ not yet |
 
 ## What is an Agent Harness
 
@@ -99,68 +168,65 @@ src/sponge/
 ├── cli/                           # CLI layer (typer)
 │   ├── app.py                     # Top-level app + command registration
 │   ├── run.py                     # sponge run <task>
-│   ├── session.py                 # sponge session [start|resume|list]
-│   ├── config_cmd.py              # sponge config [show|init|set]
-│   └── cost_cmd.py                # sponge cost [--task|--session|--export]
+│   ├── session_cmd.py             # sponge session [start|resume|chat|list]
+│   ├── config_cmd.py              # sponge config [show|set]
+│   ├── cost_cmd.py                # sponge cost [session|total|stats]
+│   ├── tune_cmd.py                # sponge tune [report|apply|review|history]
+│   ├── memory_cmd.py              # sponge memory [list|add|remove]
+│   ├── benchmark_cmd.py           # sponge benchmark
+│   └── desktop_cmd.py             # sponge desktop
 ├── core/                          # Core agent orchestrator
-│   ├── agent.py                   # Agent class — main orchestrator (~30 line while loop)
+│   ├── agent.py                   # Agent — main orchestrator (~30 line loop)
 │   ├── task.py                    # Task / TaskResult models
 │   ├── session.py                 # Session lifecycle, persistence
 │   ├── context.py                 # 5-layer context pipeline (mask→prune→summarize→slide)
-│   └── event_stream.py            # Append-only event log (audit, debug, crash recovery)
+│   ├── context_planner.py         # Per-subtask context planning
+│   ├── decomposer.py              # LLM-driven task decomposition
+│   └── condenser.py               # Sub-agent result condensation
 ├── llm/                           # Provider-agnostic LLM layer
-│   ├── base.py                    # LLMProvider ABC, Message, ChatResponse, Usage
+│   ├── base.py                    # LLMProvider ABC, Message, StreamEvent types
 │   ├── anthropic_provider.py      # Anthropic Claude provider
 │   ├── openai_provider.py         # OpenAI provider
+│   ├── deepseek_provider.py       # DeepSeek provider
+│   ├── openrouter_provider.py     # OpenRouter provider
 │   ├── factory.py                 # ProviderFactory
-│   ├── cost_estimator.py          # Pre-call cost estimator (tiktoken + pricing table)
-│   └── token_counter.py           # Token counting helpers
-├── cost/                          # Token/cost accounting
-│   ├── models.py                  # CostEntry, CostSummary, ModelPricing
-│   ├── tracker.py                 # CostTracker — per-call/task/session
-│   ├── reporter.py                # Formatted reports + exports
-│   └── budget.py                  # Budget ceiling enforcement
+│   └── token_counter.py           # Token counting (tiktoken)
+├── cost/                          # Cost accounting
+│   ├── models.py                  # CostEntry, Usage, ModelPricing, SavingsLedger
+│   ├── pricing.py                 # Pricing loader (from pricing.toml)
+│   ├── tracker.py                 # CostTracker — per-call accounting
+│   └── ledger.py                  # Savings ledger — naive vs actual
 ├── cache/                         # Multi-level caching
-│   ├── base.py                    # Cache ABC
-│   ├── result_cache.py            # Exact-match result cache (SQLite)
-│   ├── prompt_cache.py            # Provider-agnostic prompt caching manager
-│   ├── semantic_cache.py          # Embedding-similarity cache
-│   └── disk_store.py              # SQLite key-value store
-├── sandbox/                       # Isolated code execution
-│   ├── base.py                    # Sandbox ABC
-│   ├── docker_sandbox.py          # Docker container sandbox
-│   ├── e2b_sandbox.py             # E2B sandbox-as-a-service (Firecracker)
-│   └── subprocess_sandbox.py      # Local subprocess (development only)
-├── plugins/                       # Plugin & pre-processor system
-│   ├── base.py                    # Plugin ABC, PluginContext, PluginResult
+│   ├── disk_store.py              # SQLite key-value store
+│   ├── result_cache.py            # SHA256 exact-match cache
+│   ├── semantic_cache.py          # Jaccard-similarity semantic cache
+│   └── repo_state.py              # Git HEAD + dirty flag state marker
+├── plugins/                       # Plugin system
+│   ├── base.py                    # Plugin ABC, PluginContext, PluginResult, ApprovalLevel
 │   ├── registry.py                # PluginRegistry — discovery & routing
-│   ├── mcp_server.py              # MCPServerPlugin — MCP server lifecycle & tool proxy
-│   ├── sub_agent.py               # SubAgentPlugin — isolated execution, condensed results
-│   ├── preprocessor.py            # Local preprocessing pipeline (before cloud call)
-│   └── builtins/                  # Bundled plugins
-│       ├── file_ops.py            # File operations (zero LLM cost)
-│       ├── shell.py               # Shell execution (zero LLM cost)
-│       ├── search.py              # Code search (sub-agent, condensed output)
-│       └── review.py              # Code review (sub-agent, condensed output)
-├── config/                        # Configuration management
-│   ├── settings.py                # Pydantic Settings model
-│   └── loader.py                  # TOML config loading + env var interpolation
+│   ├── mcp_client.py              # MCP JSON-RPC stdio client
+│   ├── mcp_plugin.py              # MCP server → Plugin adapter
+│   └── builtins/                  # Zero-cost built-in plugins
+│       ├── file_ops.py            # File read/write/delete
+│       ├── shell.py               # Shell command execution
+│       └── search.py              # Code search (grep)
+├── sandbox/                       # Isolated execution
+│   └── subprocess_sandbox.py      # Local subprocess sandbox (timeout, output cap)
+├── config/                        # Configuration
+│   └── settings.py                # Pydantic Settings (env + TOML)
+├── telemetry/                     # Self-tuning
+│   ├── collector.py               # Cost fingerprint → SQLite
+│   ├── models.py                  # CostFingerprint, TuningProposal
+│   ├── analyzer.py                # 3 signal detectors (cache gap, budget slack, task repeat)
+│   └── tuner.py                   # Proposal store + shadow A/B + Mann-Whitney U
 ├── memory/                        # Long-term memory
-│   ├── base.py                    # MemoryStore ABC
-│   ├── project_memory.py          # Project-level memory (.sponge/memory.toml)
-│   ├── user_preferences.py        # User-level preferences (~/.sponge/prefs.toml)
-│   └── injector.py                # Memory → system prompt injection
-├── approval/                      # Approval gates & permissions
-│   ├── base.py                    # ApprovalPolicy ABC
-│   ├── chain.py                   # Approval chain (allow → confirm → reject)
-│   ├── policies.py                # Built-in policies
-│   └── session_overrides.py       # Per-session overrides (--auto-approve)
-├── telemetry/                      # Self-optimizing cost intelligence
-│   ├── collector.py                # TelemetryCollector — per-call metrics
-│   ├── models.py                   # TelemetryEntry, UsagePattern, TuningResult
-│   ├── analyzer.py                 # PatternAnalyzer — detect optimization opportunities
-│   ├── tuner.py                    # ParameterTuner — auto-adjust thresholds & TTLs
-│   └── feedback.py                 # FeedbackLoop — measure impact, reinforce/discard
+│   └── store.py                   # Project memory (.sponge/memory.toml)
+├── approval/                      # Approval gates
+│   └── __init__.py                # Approval level constants
+├── desktop/                       # Desktop UI
+│   └── server.py                  # HTTP server for browser-based chat
+├── data/                          # Static data
+│   └── pricing.toml               # Provider pricing table
 └── utils/                         # Shared utilities
     ├── logging.py                 # Structured logging
     ├── errors.py                  # Exception hierarchy

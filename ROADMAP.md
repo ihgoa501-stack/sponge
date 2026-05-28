@@ -51,7 +51,7 @@
 - [x] `utils/errors.py` — exception hierarchy
 - [x] `utils/retry.py` — exponential backoff for LLM calls
 - [x] Benchmark fixtures: 3 JSON fixtures (simple Q&A, repeated Q&A, code question)
-- [x] Tests use mock providers; 106 tests, zero real API calls
+- [x] Tests use mock providers; 157 tests, zero real API calls
 
 **Deliverable:** ✅ `sponge run "hello"` streams output + cost report. Cache hits return $0.
 
@@ -106,4 +106,4 @@ Phase 3+ ████████  Done — all commodity features implemented
            ░░      Two items remaining: multimodal + 1/10 benchmark
 ```
 
-> **Current status:** 106 tests, 64 source files, 7 CLI commands. Feature-complete.
+> **Current status:** 157 tests, 66 source files, 8 CLI commands. Feature-complete.

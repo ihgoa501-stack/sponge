@@ -1,5 +1,7 @@
 # Phase 0 Foundation Implementation Plan
 
+> ✅ **COMPLETE** — All tasks implemented. See git history for details.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Make the repository installable, testable, lintable, and ready for feature agents.

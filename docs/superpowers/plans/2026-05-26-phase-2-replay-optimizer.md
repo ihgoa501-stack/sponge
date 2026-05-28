@@ -1,5 +1,7 @@
 # Phase 2 — Replay Optimizer MVP: Implementation Plan
 
+> ✅ **COMPLETE** — All tasks implemented. `sponge tune --report` works.
+
 **Goal:** `sponge tune --report` reads fingerprints, runs detectors, shows ranked proposals. Shadow A/B validates through real sessions. Accepted proposals write to config.
 
 ---

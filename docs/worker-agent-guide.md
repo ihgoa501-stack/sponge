@@ -6,22 +6,20 @@
 
 Build a cost-learning coding agent harness: every successful run should leave behind data that makes future runs cheaper without silently downgrading the final reasoning model.
 
-## What Sponge Can Eventually Do
+## Current Capability
 
-Yes, Sponge is intended to write code. It should become a coding-capable agent harness comparable in workflow shape to Codex, Claude Code, Cursor agents, and OpenHands, with one major difference: Sponge treats cost compression as infrastructure.
+Sponge is a feature-complete coding-capable agent harness. All planned phases are implemented:
 
-Coding capability arrives in stages:
+| Phase | Capability | Status |
+|-------|------------|--------|
+| Phase 1 | Single model call | ✅ |
+| Phase 2 | Savings ledger + exact cache | ✅ |
+| Phase 3 | Context compression | ✅ |
+| Phase 4 | File/search plugins + approval | ✅ |
+| Phase 5 | Sessions + fingerprints | ✅ |
+| Phase 8 | Sub-agent condensation | ✅ |
 
-| Stage | Capability | User-Facing Meaning |
-|-------|------------|---------------------|
-| Phase 1 | Single model call | Sponge can answer coding questions, but cannot safely inspect or edit projects yet. |
-| Phase 2 | Savings ledger + exact cache | Repeated coding questions can be answered from cache when state is compatible. |
-| Phase 3 | Context compression | Multi-turn coding conversations send fewer paid tokens. |
-| Phase 4 | File/search plugins + approval | Sponge can inspect code locally and perform approved file edits. |
-| Phase 5 | Sessions + fingerprints | Sponge can resume coding tasks and produce replayable cost records. |
-| Phase 8 | Sub-agent condensation | Sponge can search/review larger codebases while sending condensed evidence to the main model. |
-
-Until Phase 4 write tools exist, Sponge is not a practical code-writing agent. It is only a cost-aware conversational CLI.
+Sponge can inspect code, perform approved file edits, execute shell commands (sandboxed), search codebases with condensed sub-agent results, and maintain multi-turn conversations with history compression — all with cost fingerprint tracking and self-tuning optimization.
 
 ## Non-Negotiable Product Rules
 

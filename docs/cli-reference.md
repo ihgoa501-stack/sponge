@@ -1,5 +1,3 @@
-> ⚠️ **Draft** — CLI commands described here are planned for Phase 1+. Only `sponge --version` currently exists. See [project-plan.md](project-plan.md) for current status.
-
 # CLI Reference
 
 > `sponge` 命令的完整参考。所有命令基于 typer 构建，支持 `--help`。
@@ -12,15 +10,8 @@
 |------|------|------|------|
 | `--version` | flag | — | 打印版本号并退出 |
 | `--help` | flag | — | 打印帮助信息 |
-| `--config` | path | `~/.sponge/config.toml` | 指定配置文件路径 |
-| `--as` | string | — | 切换用户/bot 身份（多账号场景） |
-| `--no-stream` | flag | false | 禁用流式输出（CI/管道模式） |
-| `--auto-approve` | flag | false | 自动批准所有 Confirm 梯级的工具调用 |
-| `--read-only` | flag | false | 拒绝所有写/执行操作（审查模式） |
-| `--approval-policy` | string | default | 加载命名审批策略 |
-| `--sandbox` | string | subprocess | 沙箱类型：subprocess / docker / e2b |
-| `--verbose` | flag | false | 显示详细日志和成本分解 |
-| `--json` | flag | false | 以 JSON 格式输出（非交互模式） |
+
+> 注意：`--json`、`--no-stream`、`--auto-approve` 等选项是各命令的独立选项，非全局。请使用 `sponge <command> --help` 查看具体命令的可用选项。
 
 ---
 
@@ -317,19 +308,13 @@ $ sponge tune --report
 
 **用法:** `sponge memory [OPTIONS] COMMAND [ARGS]`
 
-查看和编辑项目/用户记忆。
+管理项目记忆（`.sponge/memory.toml`）。
 
 ### 子命令
 
-#### `sponge memory show`
+#### `sponge memory list`
 
-显示当前项目和用户记忆。
-
-| 选项 | 类型 | 默认 | 说明 |
-|------|------|------|------|
-| `--project` | flag | true | 显示项目记忆 |
-| `--user` | flag | false | 显示用户偏好 |
-| `--json` | flag | false | JSON 格式输出 |
+列出所有记忆规则。
 
 #### `sponge memory add`
 
@@ -338,8 +323,6 @@ $ sponge tune --report
 | 参数 | 类型 | 必需 | 说明 |
 |------|------|------|------|
 | `RULE` | string | ✅ | 规则内容，如 "Use httpx not requests" |
-| `--key` | string | 自动生成 | 规则键名 |
-| `--scope` | string | project | project / user |
 
 #### `sponge memory remove`
 
@@ -347,58 +330,42 @@ $ sponge tune --report
 
 | 参数 | 类型 | 必需 | 说明 |
 |------|------|------|------|
-| `KEY` | string | ✅ | 规则键名 |
+| `NUMBER` | int | ✅ | 规则编号（从 `list` 获取） |
 
 ### 示例
 
 ```bash
-# 查看项目记忆
-sponge memory show
+# 列出记忆
+sponge memory list
 
 # 添加规则
-sponge memory add "Never modify test/fixtures/" --key no_touch
+sponge memory add "Never modify test/fixtures/"
 
 # 删除规则
-sponge memory remove no_touch
+sponge memory remove 1
 ```
 
 ---
 
-## `sponge mcp` — MCP Server 管理
+## `sponge benchmark` — 基准测试
 
-**用法:** `sponge mcp [OPTIONS] COMMAND [ARGS]`
+**用法:** `sponge benchmark [OPTIONS]`
 
-管理 MCP server。
+对真实 LLM provider 运行基准测试 fixture。
 
-### 子命令
+## `sponge desktop` — 桌面界面
 
-#### `sponge mcp list`
+**用法:** `sponge desktop [OPTIONS]`
 
-列出已注册的 MCP server。
-
-#### `sponge mcp status`
-
-显示 MCP server 的运行状态。
-
-#### `sponge mcp restart`
-
-重启 MCP server。
-
-| 参数 | 类型 | 必需 | 说明 |
-|------|------|------|------|
-| `NAME` | string | ✅ | server 名称 |
-
-#### `sponge mcp add`
-
-添加 MCP server（同 `sponge config add-mcp`）。
+启动基于浏览器的 Sponge Desktop 聊天界面。
 
 ---
 
-## `sponge version`
+## `--version`
 
-**用法:** `sponge version`
+**用法:** `sponge --version`
 
-打印版本号和构建信息。
+打印版本号。
 
 ---
 

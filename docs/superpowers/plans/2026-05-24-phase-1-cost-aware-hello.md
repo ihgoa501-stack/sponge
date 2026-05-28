@@ -1,5 +1,7 @@
 # Phase 1 Cost-Aware Hello Implementation Plan
 
+> ✅ **COMPLETE** — Superseded by `2026-05-24-phase-1-cost-fingerprint.md`. All tasks implemented.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Implement `sponge run "say hello"` as a single streamed model call with usage and cost reporting.
