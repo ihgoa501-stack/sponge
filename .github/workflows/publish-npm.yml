@@ -17,6 +17,8 @@ jobs:
 
       - name: Publish to npm
         working-directory: npm-wrapper
-        run: npm publish --access public
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+          npm publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
