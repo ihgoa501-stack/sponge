@@ -31,21 +31,27 @@ TELEMETRY_DB = Path.home() / ".sponge" / "telemetry" / "desktop_fp.db"
 
 app = FastAPI(title="Sponge Desktop", version="0.1.0")
 
+_agent: Agent | None = None
 
-def _build_agent() -> Agent:
-    settings = Settings()
-    provider = create_provider(settings)
-    store = DiskStore(CACHE_DB)
-    cache = ResultCache(store, settings)
-    collector = TelemetryCollector(TELEMETRY_DB)
-    sem_cache = SemanticCache(store=store)
-    return Agent(
-        provider, settings, cache, collector,
-        services=AgentServices(
-            plugins=PluginRegistry(get_builtin_plugins()),
-            semantic_cache=sem_cache,
-        ),
-    )
+
+def _get_agent() -> Agent:
+    """Return the singleton agent instance (lazy init, reused across requests)."""
+    global _agent
+    if _agent is None:
+        settings = Settings()
+        provider = create_provider(settings)
+        store = DiskStore(CACHE_DB)
+        cache = ResultCache(store, settings)
+        collector = TelemetryCollector(TELEMETRY_DB)
+        sem_cache = SemanticCache(store=store)
+        _agent = Agent(
+            provider, settings, cache, collector,
+            services=AgentServices(
+                plugins=PluginRegistry(get_builtin_plugins()),
+                semantic_cache=sem_cache,
+            ),
+        )
+    return _agent
 
 
 @app.get("/")
@@ -68,7 +74,7 @@ async def chat(request: Request) -> StreamingResponse:
             _empty(), media_type="text/event-stream"
         )
 
-    agent = _build_agent()
+    agent = _get_agent()
     task = Task(prompt=message or "Describe this image.", images=images or None)
 
     async def _stream() -> AsyncGenerator[str, None]:

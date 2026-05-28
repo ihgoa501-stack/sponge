@@ -73,6 +73,10 @@ def save_session(session: Session) -> None:
                 }
             )
         )
+    # Save model so we can restore it on load.
+    lines.append(
+        json.dumps({"__meta__": True, "model": session.model})
+    )
     path.write_text("\n".join(lines) + "\n")
 
 
@@ -83,10 +87,14 @@ def load_session(session_id: str) -> Session | None:
         return None
 
     turns = []
+    model = ""
     for line in path.read_text().strip().split("\n"):
         if not line:
             continue
         data = json.loads(line)
+        if data.get("__meta__"):
+            model = data.get("model", "")
+            continue
         turns.append(
             Turn(
                 role=data["role"],
@@ -96,9 +104,6 @@ def load_session(session_id: str) -> Session | None:
                 cache_hit=data.get("cache_hit", False),
             )
         )
-
-    # Infer model from first assistant turn metadata, or empty.
-    model = ""
 
     return Session(id=session_id, turns=turns, model=model)
 

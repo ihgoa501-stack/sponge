@@ -13,6 +13,13 @@ _repo_state_cache: str | None = None
 _state_fetched: bool = False
 
 
+def refresh_repo_state() -> None:
+    """Force recomputation of repo state on next get_repo_state() call."""
+    global _state_fetched, _repo_state_cache
+    _state_fetched = False
+    _repo_state_cache = None
+
+
 def get_repo_state() -> str:
     """Return current git HEAD + dirty flag, memoized per process.
 

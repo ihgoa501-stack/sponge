@@ -36,17 +36,35 @@ _CMD_RE = re.compile(
 # ── Dangerous command blocklist ────────────────────────────────────
 
 _BLOCKLIST = [
-    r"\brm\s+-rf\s+/",
-    r"\bsudo\b",
-    r"\bchmod\s+777\s+/",
-    r"\bmkfs\b",
-    r"\bdd\s+if=",
-    r"\b:(){ :|:& };:",  # fork bomb
-    r">\s*/dev/sda",
-    r"\bcurl\b.*\b/bin/bash",
-    r"\bwget\b.*\b/bin/bash",
-    r"\bshutdown\b",
-    r"\breboot\b",
+    r"\brm\s+.*-r[a-z]*f[a-z]*\b",              # rm -rf / rm -r / rm -rf /*
+    r"\brm\s+.*-f[a-z]*r[a-z]*\b",              # rm -fr
+    r"\brm\s+.*--recursive\b",                    # rm --recursive
+    r"\brmdir\b.*\*/?\s*$",                        # rmdir with wildcard
+    r"\bsudo\b",                                   # sudo
+    r"\bsu\s",                                    # su (switch user)
+    r"\bdoas\b",                                   # doas (OpenBSD sudo alt)
+    r"\bpkexec\b",                                 # pkexec (polkit)
+    r"\bchmod\s+.*777\b",                         # chmod 777
+    r"\bchmod\s+.*-R[a-z]*\s+777\b",             # chmod -R 777
+    r"\bchown\s+.*root\b",                        # chown root
+    r"\bmkfs\b",                                   # mkfs
+    r"\bdd\s+if=",                                # dd
+    r"\b:\(\)\s*\{\s*:\|:&\s*\}\s*;\s*:",         # fork bomb
+    r">\s*/dev/sd[a-z]",                           # redirect to raw device
+    r">\s*/dev/mmcblk",                            # redirect to mmc device
+    r">\s*/dev/nvme",                              # redirect to nvme device
+    r"\bcurl\b.*\|\s*(?:ba)?sh\b",               # curl | bash/sh
+    r"\bcurl\b.*\|\s*zsh\b",                      # curl | zsh
+    r"\bwget\b.*\|\s*(?:ba)?sh\b",               # wget | bash/sh
+    r"\bwget\b.*\|\s*zsh\b",                      # wget | zsh
+    r"\bwget\b.*-O\s*-\s*\|",                     # wget -O- |
+    r"\bcurl\b.*-o\s*\S+\s*;",                    # curl download then script
+    r"\bshutdown\b",                               # shutdown
+    r"\breboot\b",                                 # reboot
+    r"\bhalt\b",                                   # halt
+    r"\bpoweroff\b",                               # poweroff
+    r"\binit\s+[06]\b",                           # init runlevel 0/6
+    r"\bsystemctl\s+(?:halt|poweroff|reboot)\b",  # systemctl shutdown
 ]
 
 

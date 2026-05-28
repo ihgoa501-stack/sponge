@@ -145,6 +145,17 @@ def run_task(
 
 
 def _apply_shadow_override(settings: Settings, param: str, value: object) -> None:
-    """Apply a shadow parameter override to settings."""
+    """Apply a shadow parameter override to settings.
+
+    Only allows overriding known safe tuning parameters. Rejects any
+    parameter not in the whitelist (e.g. api keys, provider name).
+    """
+    _allowed = frozenset({
+        "cache_ttl_hours",
+        "budget_per_session",
+        "context_token_budget",
+    })
+    if param not in _allowed:
+        return
     if hasattr(settings, param):
         setattr(settings, param, value)

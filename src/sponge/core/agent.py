@@ -1,5 +1,6 @@
 """Agent — the core orchestrator (~30 lines)."""
 
+import asyncio
 import hashlib
 import logging
 import uuid
@@ -418,7 +419,10 @@ class Agent:
         # Record fingerprint.
         fp = self._make_fingerprint(
             session_id=session_id,
-            task_hash=str(hash(user_message)) if user_message else "",
+            task_hash=(
+                str(hashlib.md5(user_message.encode()).hexdigest()[:16])
+                if user_message else ""
+            ),
             model=model,
             cost_entry=cost_entry,
             cache_hit=False,
@@ -480,6 +484,10 @@ class Agent:
                             tracker.record_usage(usage)
             except KeyboardInterrupt:
                 logger.info("Stream interrupted by user")
+                if chunks:
+                    chunks.append("\n\n[interrupted]")
+            except asyncio.CancelledError:
+                logger.info("Stream cancelled by user")
                 if chunks:
                     chunks.append("\n\n[interrupted]")
             return "".join(chunks), tracker.finalize(model)

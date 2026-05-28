@@ -205,7 +205,7 @@ async def test_run_with_history_appends_turns() -> None:
     """run_with_history appends user + assistant turns to the session."""
     tmp = Path(tempfile.mkdtemp())
     store = DiskStore(tmp / "cache.db")
-    settings = Settings(cache_enabled=True)
+    settings = Settings(cache_enabled=True, provider="anthropic")
     cache = ResultCache(store, settings)
     collector = TelemetryCollector(tmp / "telemetry.db")
     main_provider = MockProvider(responses=["I remember our conversation."])
@@ -231,7 +231,7 @@ async def test_run_with_history_tracks_cost() -> None:
     """run_with_history records cost on assistant turn and fingerprint."""
     tmp = Path(tempfile.mkdtemp())
     store = DiskStore(tmp / "cache.db")
-    settings = Settings(cache_enabled=True)
+    settings = Settings(cache_enabled=True, provider="anthropic")
     cache = ResultCache(store, settings)
     collector = TelemetryCollector(tmp / "telemetry.db")
     main_provider = MockProvider(responses=["Response with cost"])
@@ -254,7 +254,7 @@ async def test_run_with_history_max_history_sliding_window() -> None:
     """Only the most recent max_history turns are sent to the provider."""
     tmp = Path(tempfile.mkdtemp())
     store = DiskStore(tmp / "cache.db")
-    settings = Settings(cache_enabled=True, context_token_budget=999999)
+    settings = Settings(cache_enabled=True, context_token_budget=999999, provider="anthropic")
     cache = ResultCache(store, settings)
     collector = TelemetryCollector(tmp / "telemetry.db")
 

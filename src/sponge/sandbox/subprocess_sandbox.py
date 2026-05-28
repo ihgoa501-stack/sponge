@@ -8,6 +8,7 @@ executors.
 from __future__ import annotations
 
 import logging
+import os
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -31,6 +32,7 @@ class SubprocessSandbox:
     - Working directory restricted to cwd or a subdirectory.
     - Timeout prevents runaway processes.
     - Output is capped to prevent memory exhaustion.
+    - Network access can be disabled via allow_network=False.
     """
 
     def __init__(
@@ -60,6 +62,7 @@ class SubprocessSandbox:
             SandboxResult with stdout, stderr, exit_code.
         """
         work_dir = self._resolve_cwd(cwd)
+        run_env = self._build_env(env)
 
         try:
             result = subprocess.run(
@@ -69,7 +72,7 @@ class SubprocessSandbox:
                 text=True,
                 timeout=self._timeout,
                 cwd=str(work_dir),
-                env=env,
+                env=run_env,
             )
             return SandboxResult(
                 stdout=result.stdout[: self._max_output],
@@ -89,6 +92,22 @@ class SubprocessSandbox:
                 stderr=f"Command not found: {cmd}",
                 exit_code=-1,
             )
+
+    def _build_env(self, extra: dict[str, str] | None) -> dict[str, str] | None:
+        """Build the subprocess environment, stripping network if blocked."""
+        if not self._allow_network:
+            sandbox_env = os.environ.copy()
+            sandbox_env.pop("HTTP_PROXY", None)
+            sandbox_env.pop("HTTPS_PROXY", None)
+            sandbox_env.pop("http_proxy", None)
+            sandbox_env.pop("https_proxy", None)
+            sandbox_env.pop("NO_PROXY", None)
+            sandbox_env.pop("no_proxy", None)
+            if extra:
+                sandbox_env.update({k: v for k, v in extra.items()
+                                    if not k.upper().endswith("_PROXY")})
+            return sandbox_env
+        return extra
 
     def _resolve_cwd(self, cwd: str | Path | None) -> Path:
         """Resolve and validate working directory."""

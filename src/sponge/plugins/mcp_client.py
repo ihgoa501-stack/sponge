@@ -7,6 +7,7 @@ stdin/stdout. Discovers tools and proxies tool calls.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import logging
 import subprocess
@@ -50,10 +51,19 @@ class MCPClient:
     def server_name(self) -> str:
         return self._server_name
 
+    def _process_alive(self) -> bool:
+        """Check if the managed subprocess is still running."""
+        if self._process is None:
+            return False
+        return self._process.poll() is None
+
     def start(self) -> None:
-        """Spawn the MCP server subprocess."""
-        if self._process is not None:
+        """Spawn the MCP server subprocess, or restart a crashed one."""
+        if self._process_alive():
             return
+        if self._process is not None:
+            self._cleanup_pipes()
+            self._process = None
 
         self._process = subprocess.Popen(
             self._command,
@@ -62,19 +72,33 @@ class MCPClient:
             stderr=subprocess.PIPE,
             text=True,
         )
+        self._request_id = 0
         logger.info("MCP server '%s' started (pid=%d)", self._server_name, self._process.pid)
 
     def stop(self) -> None:
-        """Terminate the MCP server subprocess."""
+        """Terminate the MCP server subprocess and close pipes."""
         if self._process is None:
             return
         try:
             self._process.terminate()
             self._process.wait(timeout=5)
         except (subprocess.TimeoutExpired, OSError):
-            self._process.kill()
+            try:
+                self._process.kill()
+                self._process.wait(timeout=5)
+            except (subprocess.TimeoutExpired, OSError):
+                pass
+        self._cleanup_pipes()
         self._process = None
         logger.info("MCP server '%s' stopped", self._server_name)
+
+    def _cleanup_pipes(self) -> None:
+        """Close subprocess pipes to prevent fd leaks."""
+        if self._process is not None:
+            for pipe in (self._process.stdin, self._process.stdout, self._process.stderr):
+                if pipe is not None:
+                    with contextlib.suppress(OSError):
+                        pipe.close()
 
     def _send_request(self, method: str, params: dict | None = None) -> dict:
         """Send a JSON-RPC request and return the response."""
@@ -93,7 +117,10 @@ class MCPClient:
         self._process.stdin.write(payload)
         self._process.stdin.flush()
 
-        response_line = self._process.stdout.readline()
+        try:
+            response_line = self._process.stdout.readline()
+        except Exception as exc:
+            raise RuntimeError(f"MCP server '{self._server_name}' read error") from exc
         if not response_line:
             raise RuntimeError(f"MCP server '{self._server_name}' closed stdout")
 

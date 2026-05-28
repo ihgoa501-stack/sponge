@@ -99,6 +99,9 @@ class SemanticCache:
             return
         try:
             for key, raw in self._disk.list_by_prefix(self._PREFIX):
+                # Stop loading if we've hit the in-memory limit.
+                if len(self._store) >= self._max_entries:
+                    break
                 try:
                     data = json.loads(raw)
                     short_key = key[len(self._PREFIX):]  # strip prefix

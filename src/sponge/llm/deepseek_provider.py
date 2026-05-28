@@ -11,6 +11,19 @@ from sponge.utils.errors import ProviderError
 logger = logging.getLogger("sponge.llm.deepseek")
 
 
+def _build_api_messages(messages: list[Message]) -> list[dict[str, object]]:
+    api_messages: list[dict[str, object]] = []
+    for m in messages:
+        if m.images:
+            content: list[dict[str, object]] = [{"type": "text", "text": m.content}]
+            for img in m.images:
+                content.append({"type": "image_url", "image_url": {"url": img}})
+            api_messages.append({"role": m.role, "content": content})
+        else:
+            api_messages.append({"role": m.role, "content": m.content})
+    return api_messages
+
+
 class DeepSeekProvider(LLMProvider):
     """LLM provider for DeepSeek models (V3, R1) via OpenAI-compatible API."""
 
@@ -38,7 +51,7 @@ class DeepSeekProvider(LLMProvider):
 
         client = AsyncOpenAI(api_key=self._api_key, base_url=self.BASE_URL)
 
-        api_messages = [{"role": m.role, "content": m.content} for m in messages]
+        api_messages = _build_api_messages(messages)
 
         try:
             stream = await client.chat.completions.create(

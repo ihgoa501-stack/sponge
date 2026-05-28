@@ -1,10 +1,23 @@
 """Pydantic settings for Sponge configuration.
 
 Reads from environment variables (SPONGE_*), .env file, and
-~/.sponge/config.toml at runtime.
+~/.sponge/config.toml at runtime. Config file values override defaults
+but are overridden by explicit environment variables.
 """
 
+import tomllib
+from pathlib import Path
+from typing import Any
+
 from pydantic_settings import BaseSettings
+
+CONFIG_PATH = Path.home() / ".sponge" / "config.toml"
+
+
+def _load_config_toml() -> dict[str, Any]:
+    if CONFIG_PATH.is_file():
+        return tomllib.loads(CONFIG_PATH.read_text())
+    return {}
 
 
 class Settings(BaseSettings):
@@ -43,3 +56,8 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     deepseek_api_key: str = ""
     openrouter_api_key: str = ""
+
+    def __init__(self, **kwargs: Any) -> None:
+        config = _load_config_toml()
+        config.update(kwargs)
+        super().__init__(**config)

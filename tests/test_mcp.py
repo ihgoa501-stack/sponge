@@ -42,6 +42,9 @@ class _FakePopen:
     def wait(self, timeout: float | None = None) -> None:  # noqa: ARG002
         pass
 
+    def poll(self) -> None:
+        return None
+
 
 class _FakeStdin:
     def __init__(self) -> None:
@@ -51,6 +54,9 @@ class _FakeStdin:
         self.writes.append(data)
 
     def flush(self) -> None:
+        pass
+
+    def close(self) -> None:
         pass
 
 
@@ -70,10 +76,16 @@ class _FakeStdout:
         self._idx += 1
         return json.dumps(resp) + "\n"
 
+    def close(self) -> None:
+        pass
+
 
 class _FakeStderr:
     def read(self) -> str:
         return ""
+
+    def close(self) -> None:
+        pass
 
 
 def _build_tools_list_response() -> dict:

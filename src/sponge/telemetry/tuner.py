@@ -62,9 +62,9 @@ def _mannwhitneyu(x: list[float], y: list[float], alternative: str = "less") -> 
         return u1, 1.0
 
     z = (u1 - mu) / sigma
-    # One-tailed p from z-score (normal approximation).
+    # Phi(z) — standard normal CDF via error function.
     p = 0.5 * (1.0 + _erf(z / 1.4142135623730951))  # z / sqrt(2)
-    if alternative == "less":
+    if alternative == "greater":
         p = 1.0 - p
 
     return u1, min(1.0, max(0.0, p))

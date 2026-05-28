@@ -35,7 +35,7 @@ def tune_report() -> None:
             f"(confidence: {p.confidence:.2f}, risk: {p.risk})"
         )
         typer.echo(f"   {p.reason}")
-        typer.echo(f"   [{p.state}] — approve: sponge tune --apply {p.id}")
+        typer.echo(f"   [{p.state}] — approve: sponge tune apply {p.id}")
 
     # Save all proposals to store.
     for p in proposals:
@@ -93,7 +93,7 @@ def tune_history() -> None:
     proposals = tuner.store.list_all()
 
     if not proposals:
-        typer.echo("No proposals yet. Run 'sponge tune --report' first.")
+        typer.echo("No proposals yet. Run 'sponge tune report' first.")
         return
 
     typer.echo("Tuning History")

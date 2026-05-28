@@ -3,6 +3,9 @@
 from unittest import mock
 
 import pytest
+
+pytest.importorskip("fastapi", reason="fastapi is not installed (pip install sponge-ai[desktop])")
+
 from fastapi.testclient import TestClient
 
 

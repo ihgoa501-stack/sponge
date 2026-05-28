@@ -6,11 +6,12 @@ _FALLBACK_CHARS_PER_TOKEN = 4
 
 # Known tiktoken encoding overrides per model family.
 _MODEL_ENCODINGS: dict[str, str] = {
-    "claude": "cl100k_base",
     "gpt-4": "cl100k_base",
     "gpt-4o": "o200k_base",
     "gpt-4o-mini": "o200k_base",
     "gpt-5": "o200k_base",
+    "gpt-3.5": "cl100k_base",
+    "claude": "cl100k_base",
     "deepseek": "cl100k_base",
 }
 

@@ -3,7 +3,6 @@
 import webbrowser
 
 import typer
-import uvicorn
 
 
 def run_desktop(
@@ -11,6 +10,8 @@ def run_desktop(
     no_browser: bool = typer.Option(False, "--no-browser", help="Don't open browser."),
 ) -> None:
     """Launch the Sponge Desktop chat interface."""
+    import uvicorn
+
     if not no_browser:
         webbrowser.open(f"http://localhost:{port}")
 
